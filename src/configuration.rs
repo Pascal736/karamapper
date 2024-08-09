@@ -9,15 +9,14 @@ pub struct Configuration {
     pub remaps: Remaps,
     pub commands: Commands,
     pub layers: Layers,
-    pub layer_assignments: LayerAssingments,
 }
 
 impl Configuration {
     pub fn from_toml(value: &Value) -> Result<Self> {
-        let remaps = value
-            .get("remaps")
-            .map(Remaps::from_toml)
-            .unwrap_or_else(|| Ok(Remaps { remaps: vec![] }))?;
+        let remaps = match value.get("remaps") {
+            Some(remaps) => Remaps::from_toml(remaps)?,
+            None => Remaps { remaps: vec![] },
+        };
 
         let commands = value
             .get("commands")
@@ -29,18 +28,15 @@ impl Configuration {
             .map(Layers::from_toml)
             .unwrap_or_else(|| Ok(Layers { layers: vec![] }))?;
 
-        let layer_assignments = LayerAssingments::from_toml(value, &layers)?;
-
         Ok(Configuration {
             remaps,
             commands,
             layers,
-            layer_assignments,
         })
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Remaps {
     pub remaps: Vec<Remap>,
 }
@@ -71,7 +67,7 @@ impl Remaps {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Remap {
     pub from: Key,
     pub to: Vec<Key>,
@@ -111,40 +107,17 @@ pub struct Command {
 pub struct Layers {
     pub layers: Vec<Layer>,
 }
+impl Default for Layers {
+    fn default() -> Self {
+        Self { layers: vec![] }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Layer {
     name: String,
-    keys: Vec<Key>,
-}
-
-impl Layers {
-    pub fn from_toml(value: &Value) -> Result<Self> {
-        let layers = value
-            .as_table()
-            .context("Invalid layers format")?
-            .iter()
-            .map(|(layer_name, layer_keys)| {
-                let keys_str = layer_keys.as_str().context(format!(
-                    "Expected string for layer keys, got: {:?}",
-                    layer_keys
-                ))?;
-
-                let keys = keys_str
-                    .split('+')
-                    .map(|key| {
-                        Key::try_from(key).with_context(|| format!("Invalid key in layer: {}", key))
-                    })
-                    .collect::<Result<Vec<Key>>>()?;
-
-                Ok(Layer {
-                    name: layer_name.to_string(),
-                    keys,
-                })
-            })
-            .collect::<Result<Vec<Layer>>>()?;
-        Ok(Layers { layers })
-    }
+    activation_keys: Vec<Key>,
+    assignments: LayerAssingments,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -154,113 +127,16 @@ pub struct LayerAssingments {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LayerAssingment {
-    layer: Layer,
+    keys: Vec<Key>,
     command: Command,
     next_layer: Option<Layer>,
     description: Option<String>,
 }
-impl LayerAssingments {
-    pub fn from_toml(value: &Value, layers: &Layers) -> Result<Self> {
-        let layer_assignments = value
-            .as_table()
-            .context("Invalid top-level format")?
-            .iter()
-            .filter_map(|(layer_name, layer_assignments_value)| {
-                // Only consider entries that start with "layer" but aren't the "layers" section itself
-                if layer_name.starts_with("layer") && !layer_name.eq("layers") {
-                    Some(
-                        layer_assignments_value
-                            .as_table()
-                            .context(format!("Invalid layer assignment for {}", layer_name))
-                            .and_then(|layer_table| {
-                                let assignments = layer_table
-                                    .iter()
-                                    .map(|(key, assignment_value)| {
-                                        // Lookup the corresponding layer
-                                        let layer = layers
-                                            .layers
-                                            .iter()
-                                            .find(|l| &l.name == layer_name)
-                                            .context(format!("Layer not found: {}", layer_name))?
-                                            .clone();
 
-                                        match assignment_value {
-                                            Value::String(command_name) => {
-                                                // Simple command assignment
-                                                let command = Command {
-                                                    value: command_name.clone(),
-                                                };
-                                                Ok(LayerAssingment {
-                                                    layer: layer.clone(),
-                                                    command,
-                                                    next_layer: None,
-                                                    description: None,
-                                                })
-                                            }
-                                            Value::Table(command_table) => {
-                                                // Complex command assignment
-                                                let command_name = command_table
-                                                    .get("command")
-                                                    .and_then(|v| v.as_str())
-                                                    .context(format!(
-                                                        "Invalid command for key: {}",
-                                                        key
-                                                    ))?;
-                                                let command = Command {
-                                                    value: command_name.to_string(),
-                                                };
-
-                                                let layer_after = command_table
-                                                    .get("next_layer")
-                                                    .and_then(|v| v.as_str())
-                                                    .map(|layer_name| {
-                                                        layers
-                                                            .layers
-                                                            .iter()
-                                                            .find(|l| l.name == layer_name)
-                                                            .cloned()
-                                                    })
-                                                    .flatten();
-
-                                                // Optional description
-                                                let description = command_table
-                                                    .get("description")
-                                                    .and_then(|v| v.as_str())
-                                                    .map(String::from);
-
-                                                Ok(LayerAssingment {
-                                                    layer: layer.clone(),
-                                                    command,
-                                                    next_layer: layer_after,
-                                                    description,
-                                                })
-                                            }
-                                            _ => Err(anyhow::anyhow!(
-                                                "Invalid assignment for key: {}",
-                                                key
-                                            )),
-                                        }
-                                    })
-                                    .collect::<Result<Vec<LayerAssingment>>>()?;
-                                Ok(LayerAssingments {
-                                    layer_assingments: assignments,
-                                })
-                            }),
-                    )
-                } else {
-                    None
-                }
-            })
-            .collect::<Result<Vec<LayerAssingments>>>()?;
-
-        let layer_assignments = LayerAssingments {
-            layer_assingments: layer_assignments
-                .into_iter()
-                .flat_map(|x| x.layer_assingments)
-                .collect(),
-        };
-
-        Ok(layer_assignments)
+impl LayerAssingment {
+    fn parse_from_toml(value: &Value) -> Result<Self> {
+        // Get each vale belww
+        todo!()
     }
 }
 
@@ -311,36 +187,14 @@ mod tests {
     }
 
     #[test]
-    fn test_layers_from_toml() -> Result<()> {
-        let toml_str = r#"
-            [layers]
-            layer1 = "hyper"
-            layer2 = "hyper+v"
-            "#;
-
-        let toml_value: Value = toml_str.parse()?;
-        let layers = Layers::from_toml(toml_value.get("layers").unwrap())?;
-
-        assert_eq!(layers.layers.len(), 2);
-        assert_eq!(layers.layers[0].name, "layer1".to_string());
-        assert_eq!(layers.layers[0].keys[0], Key::Hyper);
-
-        assert_eq!(layers.layers[1].name, "layer2".to_string());
-        assert_eq!(layers.layers[1].keys[0], Key::Hyper);
-        assert_eq!(layers.layers[1].keys[1], Key::V);
-        Ok(())
-    }
-
-    #[test]
     fn test_layer_assignments_from_toml() -> Result<()> {
         let toml_str = r#"
-            [layers]
-            layer1 = "hyper"
-            layer2 = "hyper+v"
-
-            [layer1]
+            layer.layer1.shortcut = hyper
+            [layer.layer1.assignments]
             h = "hello"
             y = { command = "hello2", next_layer= "layer2", description = "These arguments are optional" }
+
+            layer.layer2.shortcut = hyper+v
             "#;
 
         let toml_value: Value = toml_str.parse()?;
@@ -427,6 +281,48 @@ mod tests {
             config.layer_assignments.layer_assingments[0].layer.name,
             "layer1".to_string()
         );
+        Ok(())
+    }
+
+    #[test]
+    fn test_missing_categories_is_ok() -> Result<()> {
+        let toml_str = r#"
+            [commands]
+            hello = "sh -c \"echo Hello World\""
+            hello2 = "sh -c \"echo Hello World 2\""
+
+            [layers]
+            layer1 = "hyper"
+            layer2 = "hyper+v"
+
+            [layer1]
+            h = "hello"
+            y = { command = "hello2", next_layer= "base", description = "These arguments are optional" }
+            "#;
+
+        let toml_value: Value = toml_str.parse()?;
+        let config = Configuration::from_toml(&toml_value)?;
+
+        assert_eq!(config.remaps.remaps, vec![]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_not_defined_layer_is_error() -> Result<()> {
+        let toml_str = r#"
+            [commands]
+            hello = "sh -c \"echo Hello World\""
+
+            [layers]
+            layer1 = "hyper"
+
+            [wrong-layer]
+            h = "hello"
+            "#;
+
+        let toml_value: Value = toml_str.parse()?;
+        let result = LayerAssingments::from_toml(&toml_value, &Layers::default());
+        assert!(result.is_err());
         Ok(())
     }
 }
