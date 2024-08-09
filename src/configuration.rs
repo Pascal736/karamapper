@@ -104,7 +104,7 @@ impl Commands {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Command {
-    value: String,
+    pub value: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -114,8 +114,8 @@ pub struct Layers {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Layer {
-    name: String,
-    keys: Vec<Key>,
+    pub name: String,
+    pub keys: Vec<Key>,
 }
 
 impl Layers {

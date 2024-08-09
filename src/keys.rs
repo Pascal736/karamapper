@@ -10,3 +10,14 @@ pub enum Key {
     CapsLock,
     Esc,
 }
+
+impl Key {
+    pub fn to_string(&self) -> String {
+        match self {
+            Key::Hyper => "hyper".to_string(),
+            Key::V => "v".to_string(),
+            Key::CapsLock => "caps_lock".to_string(),
+            Key::Esc => "escape".to_string(),
+        }
+    }
+}

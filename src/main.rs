@@ -1,7 +1,7 @@
 pub mod configuration;
+pub mod converter;
 pub mod karabiner;
 pub mod keys;
-pub mod parser;
 
 pub use configuration::Configuration;
 use toml::Value;
