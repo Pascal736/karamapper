@@ -121,5 +121,31 @@ mod tests {
         let rule = layer_to_rule(layer);
 
         assert_eq!(rule, expected_rule);
+        assert_eq!(rule.manipulators.from.key_code, "hyper");
+        assert_eq!(rule.manipulators.from.modifiers, None);
+    }
+
+    #[test]
+    fn test_layer_with_two_keys_creates_rule() {
+        let name = String::from("layer1");
+        let keys = vec![Key::Hyper, Key::V];
+
+        let layer = Layer {
+            name: name.clone(),
+            keys: keys.clone(),
+        };
+
+        let expected_rule = Rule::set_environment(name, keys.into());
+        let rule = layer_to_rule(layer);
+
+        assert_eq!(rule, expected_rule);
+        assert_eq!(rule.manipulators.from.key_code, "hyper");
+        assert_eq!(
+            rule.manipulators.from.modifiers,
+            Some(Modifiers {
+                mandatory: Some(vec!["v".to_string()]),
+                optional: None,
+            })
+        );
     }
 }
