@@ -12,12 +12,12 @@ fn main() -> anyhow::Result<()> {
     caps_lock = "escape"
 
     [layers]
-    layer1 = "left_command+left_shift+left_option+left_control+q"
-    layer2 = "left_command+left_shift+left_option+left_control+v"
+    layer1 = "q+left_command+left_shift+left_option+left_control"
+    layer2 = "v+left_command+left_shift+left_option+left_control"
 
     # By default commands return to the base layer. Remaps remain in the current layer.
     [layer1]
-    s = { command = "open -a 'kitty.app'" }
+    s = { command = "Open -a '1Password.app'", target_layer= "layer2" }
 
     [layer2]
     a = { command = "launchpad" }

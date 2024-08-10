@@ -184,7 +184,11 @@ impl LayerAssignment {
 
             let action = Action::from_toml(value)?;
 
-            let next_layer = None;
+            let next_layer = value
+                .get("next_layer")
+                .and_then(|v| v.as_str())
+                .map(String::from)
+                .map(|name| Layer { name, keys: vec![] });
 
             let description = value
                 .get("description")
@@ -333,7 +337,7 @@ mod tests {
         let toml_str = r#"
             [layer1]
             h = { command = "hello" }
-            y = { command = "hello2" }
+            y = { command = "hello2", next_layer= "layer1", description = "These arguments are optional" }
 
             [layer2]
             a = { command = "app_launcher" }
@@ -370,8 +374,8 @@ mod tests {
                     action: Action::Command(Command {
                         value: String::from("hello2"),
                     }),
-                    next_layer: None,
-                    description: None,
+                    next_layer: Some(layer1.clone()),
+                    description: Some(String::from("These arguments are optional")),
                 },
                 LayerAssignment {
                     layer: layer2.clone(),

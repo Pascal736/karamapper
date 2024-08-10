@@ -87,8 +87,11 @@ pub struct Manipulator {
     pub conditions: Option<Vec<Condition>>,
     pub from: KeyMapping,
     pub to: Option<Vec<ManipulationTarget>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub to_delayed_action: Option<DelayedAction>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub to_after_key_up: Option<Vec<ManipulationTarget>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub to_if_alone: Option<Vec<KeyMapping>>,
     #[serde(rename = "type")]
     pub manipulator_type: String,
@@ -202,6 +205,7 @@ pub struct Modifiers {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct KeyMapping {
     pub key_code: Key,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub modifiers: Option<Modifiers>,
 }
 
