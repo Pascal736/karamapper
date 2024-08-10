@@ -2,6 +2,8 @@ use crate::configuration::*;
 use crate::karabiner::*;
 use crate::keys::Key;
 
+pub const BASE_LAYER: &str = "base";
+
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
     todo!()
 }
@@ -17,6 +19,12 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
             layer_assignment.key.into(),
             remaps.to.into(),
             None,
+        ),
+        Action::Command(command) => Rule::set_command_in_layer(
+            layer_assignment.layer.name,
+            layer_assignment.key.into(),
+            command.into(),
+            layer_assignment.next_layer.map(|l| l.name),
         ),
         _ => todo!(),
     }
@@ -82,6 +90,14 @@ impl From<Vec<Key>> for KeyMapping {
         Self {
             key_code,
             modifiers,
+        }
+    }
+}
+
+impl From<Command> for ShellCommand {
+    fn from(command: Command) -> Self {
+        ShellCommand {
+            shell_command: command.value,
         }
     }
 }
@@ -189,7 +205,7 @@ mod tests {
                     key_code: "h".to_string(),
                     modifiers: None,
                 },
-                to: Some(vec![KeyMappingOrSetVariable::KeyMapping(KeyMapping {
+                to: Some(vec![ManipulationTarget::KeyMapping(KeyMapping {
                     key_code: "esc".to_string(),
                     modifiers: None,
                 })]),
@@ -206,6 +222,10 @@ mod tests {
     }
     #[test]
     fn test_layer_assignment_to_command() {
+        let base_layer = Layer {
+            name: BASE_LAYER.to_string(),
+            keys: vec![],
+        };
         let layer_assignment = LayerAssignment {
             layer: Layer {
                 name: "layer1".to_string(),
@@ -215,7 +235,7 @@ mod tests {
             action: Action::Command(Command {
                 value: String::from("open -a Terminal"),
             }),
-            next_layer: None,
+            next_layer: Some(base_layer),
             description: None,
         };
 
@@ -232,14 +252,19 @@ mod tests {
                     key_code: "h".to_string(),
                     modifiers: None,
                 },
-                to: Some(vec![KeyMappingOrSetVariable::KeyMapping(KeyMapping {
-                    key_code: "esc".to_string(),
-                    modifiers: None,
+                to: Some(vec![ManipulationTarget::ShellCommand(ShellCommand {
+                    shell_command: "open -a Terminal".to_string(),
                 })]),
                 manipulator_type: "basic".into(),
                 to_if_alone: None,
                 to_after_key_up: None,
-                to_delayed_action: None,
+                to_delayed_action: Some(DelayedAction {
+                    to_if_canceled: vec![],
+                    to_if_invoked: vec![SetVariable {
+                        name: "layer1".to_string(),
+                        value: 0,
+                    }],
+                }),
             },
         };
 

@@ -1,3 +1,4 @@
+use crate::converter::BASE_LAYER;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -46,15 +47,28 @@ impl Rule {
             manipulators: Manipulator::set_keymapping_in_layer(layer, from, to, target_layer),
         }
     }
+
+    pub fn set_command_in_layer(
+        layer: String,
+        from: KeyMapping,
+        to: ShellCommand,
+        target_layer: Option<String>,
+    ) -> Self {
+        Self {
+            description: Some(format!("Run command {}", to.shell_command)),
+            enabled: true,
+            manipulators: Manipulator::set_command_in_layer(layer, from, to, target_layer),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Manipulator {
     pub conditions: Option<Vec<Condition>>,
     pub from: KeyMapping,
-    pub to: Option<Vec<KeyMappingOrSetVariable>>,
+    pub to: Option<Vec<ManipulationTarget>>,
     pub to_delayed_action: Option<DelayedAction>,
-    pub to_after_key_up: Option<Vec<KeyMappingOrSetVariable>>,
+    pub to_after_key_up: Option<Vec<ManipulationTarget>>,
     pub to_if_alone: Option<Vec<KeyMapping>>,
     #[serde(rename = "type")]
     pub manipulator_type: String,
@@ -65,7 +79,7 @@ impl Manipulator {
         Manipulator {
             conditions: Some(vec![Condition::inactive(name.clone())]),
             from,
-            to: Some(vec![KeyMappingOrSetVariable::set_active(name)]),
+            to: Some(vec![ManipulationTarget::set_active(name)]),
             to_delayed_action: None,
             to_after_key_up: None,
             to_if_alone: None,
@@ -82,12 +96,36 @@ impl Manipulator {
         Manipulator {
             conditions: Some(vec![Condition::active(layer.clone())]),
             from,
-            to: Some(vec![KeyMappingOrSetVariable::KeyMapping(to)]),
+            to: Some(vec![ManipulationTarget::KeyMapping(to)]),
             to_delayed_action: None,
             to_after_key_up: None,
             to_if_alone: None,
             manipulator_type: "basic".to_string(),
         }
+    }
+
+    pub fn set_command_in_layer(
+        layer: String,
+        from: KeyMapping,
+        to: ShellCommand,
+        target_layer: Option<String>,
+    ) -> Self {
+        Manipulator {
+            conditions: Some(vec![Condition::active(layer.clone())]),
+            from,
+            to: Some(vec![ManipulationTarget::ShellCommand(to)]),
+            to_delayed_action: set_target_layer(target_layer, layer),
+            to_after_key_up: None,
+            to_if_alone: None,
+            manipulator_type: "basic".to_string(),
+        }
+    }
+}
+
+fn set_target_layer(target_layer: Option<String>, source_layer: String) -> Option<DelayedAction> {
+    match target_layer {
+        None => None,
+        Some(layer) => Some(DelayedAction::set_layer(layer, source_layer)),
     }
 }
 
@@ -117,12 +155,6 @@ impl Condition {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct KeyMapping {
-    pub key_code: String,
-    pub modifiers: Option<Modifiers>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct SimpleKeyMapping {
     pub key_code: String,
 }
@@ -134,16 +166,9 @@ pub struct Modifiers {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[serde(untagged)]
-pub enum KeyMappingOrSetVariable {
-    KeyMapping(KeyMapping),
-    SetVariable(SetVariable),
-}
-
-impl KeyMappingOrSetVariable {
-    pub fn set_active(name: String) -> Self {
-        KeyMappingOrSetVariable::SetVariable(SetVariable { name, value: 1 })
-    }
+pub struct KeyMapping {
+    pub key_code: String,
+    pub modifiers: Option<Modifiers>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -153,9 +178,56 @@ pub struct SetVariable {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct ShellCommand {
+    pub shell_command: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum ManipulationTarget {
+    KeyMapping(KeyMapping),
+    SetVariable(SetVariable),
+    ShellCommand(ShellCommand),
+}
+
+impl ManipulationTarget {
+    pub fn set_active(name: String) -> Self {
+        ManipulationTarget::SetVariable(SetVariable { name, value: 1 })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct DelayedAction {
     pub to_if_canceled: Vec<SetVariable>,
     pub to_if_invoked: Vec<SetVariable>,
+}
+
+impl DelayedAction {
+    fn set_layer(target_layer: String, source_layer: String) -> Self {
+        if target_layer == BASE_LAYER {
+            return DelayedAction {
+                to_if_canceled: vec![],
+                to_if_invoked: vec![SetVariable {
+                    name: source_layer,
+                    value: 0,
+                }],
+            };
+        }
+
+        DelayedAction {
+            to_if_canceled: vec![],
+            to_if_invoked: vec![
+                SetVariable {
+                    name: target_layer,
+                    value: 1,
+                },
+                SetVariable {
+                    name: source_layer,
+                    value: 0,
+                },
+            ],
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
