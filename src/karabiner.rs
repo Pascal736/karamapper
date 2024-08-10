@@ -1,5 +1,7 @@
-use crate::converter::BASE_LAYER;
 use serde::{Deserialize, Serialize};
+
+use crate::converter::BASE_LAYER;
+use crate::keys::Key;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Profiles {
@@ -29,7 +31,7 @@ pub struct Rule {
 impl Rule {
     pub fn set_environment(name: String, from: KeyMapping) -> Self {
         Rule {
-            description: Some(format!("Change to {}", name)),
+            description: Some(format!("Change to {}", name.to_lowercase())),
             enabled: true,
             manipulators: Manipulator::set_environment(name, from),
         }
@@ -178,18 +180,18 @@ impl Condition {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct SimpleKeyMapping {
-    pub key_code: String,
+    pub key_code: Key,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Modifiers {
-    pub mandatory: Option<Vec<String>>,
-    pub optional: Option<Vec<String>>,
+    pub mandatory: Option<Vec<Key>>,
+    pub optional: Option<Vec<Key>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct KeyMapping {
-    pub key_code: String,
+    pub key_code: Key,
     pub modifiers: Option<Modifiers>,
 }
 

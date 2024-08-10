@@ -9,11 +9,11 @@ use toml::Value;
 fn main() -> anyhow::Result<()> {
     let toml_str = r#"
     [remaps]
-    caps_lock = "hyper"
+    caps_lock = "left_command"
 
     [layers]
-    layer1 = "hyper"
-    layer2 = "hyper+v"
+    layer1 = "left_command"
+    layer2 = "left_command+v"
 
     # By default commands return to the base layer. Remaps remain in the current layer.
     [layer1]

@@ -256,7 +256,7 @@ mod tests {
 
         let layer = Layer {
             name: "layer1".to_string(),
-            keys: vec![Key::Hyper],
+            keys: vec![Key::LeftCommand],
         };
 
         let expected = vec![LayerAssignment {
@@ -283,7 +283,7 @@ mod tests {
 
         let layer = Layer {
             name: "layer1".to_string(),
-            keys: vec![Key::Hyper],
+            keys: vec![Key::LeftControl],
         };
 
         let expected = vec![LayerAssignment {
@@ -309,7 +309,7 @@ mod tests {
             [layer1]
             h = { command = "hello" }
             y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
-            a = { remap =  "ctrl+shift+left_arrow"}
+            a = { remap =  "left_command+shift+left_arrow"}
 
             [layer2]
             a = { command = "app_launcher" }
@@ -317,7 +317,7 @@ mod tests {
         let expected_toml = toml::toml! {
             h = { command = "hello" }
             y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
-            a = { remap =  "ctrl+shift+left_arrow"}
+            a = { remap =  "left_command+shift+left_arrow"}
         };
         let layer_name = "layer1";
         let toml_value: Value = toml_str.parse()?;
@@ -341,7 +341,7 @@ mod tests {
 
         let layer1 = Layer {
             name: "layer1".to_string(),
-            keys: vec![Key::Hyper],
+            keys: vec![Key::LeftCommand],
         };
         let layer2 = Layer {
             name: "layer2".to_string(),
@@ -392,8 +392,8 @@ mod tests {
     fn test_remaps_from_toml() -> anyhow::Result<()> {
         let toml_str = r#"
         [remaps]
-        caps_lock= "hyper"
-        v = "esc"
+        caps_lock= "left_command"
+        v = "escape"
         "#;
 
         let toml_value: Value = toml_str.parse()?;
@@ -401,9 +401,9 @@ mod tests {
 
         assert_eq!(remaps.remaps.len(), 2);
         assert_eq!(remaps.remaps[0].from, Key::CapsLock);
-        assert_eq!(remaps.remaps[0].to[0], Key::Hyper);
+        assert_eq!(remaps.remaps[0].to[0], Key::LeftCommand);
         assert_eq!(remaps.remaps[1].from, Key::V);
-        assert_eq!(remaps.remaps[1].to[0], Key::Esc);
+        assert_eq!(remaps.remaps[1].to[0], Key::Escape);
         Ok(())
     }
 
@@ -411,8 +411,8 @@ mod tests {
     fn test_layers_from_toml() -> Result<()> {
         let toml_str = r#"
             [layers]
-            layer1 = "hyper"
-            layer2 = "hyper+v"
+            layer1 = "left_command"
+            layer2 = "left_command+v"
             "#;
 
         let toml_value: Value = toml_str.parse()?;
@@ -420,10 +420,10 @@ mod tests {
 
         assert_eq!(layers.layers.len(), 2);
         assert_eq!(layers.layers[0].name, "layer1".to_string());
-        assert_eq!(layers.layers[0].keys[0], Key::Hyper);
+        assert_eq!(layers.layers[0].keys[0], Key::LeftCommand);
 
         assert_eq!(layers.layers[1].name, "layer2".to_string());
-        assert_eq!(layers.layers[1].keys[0], Key::Hyper);
+        assert_eq!(layers.layers[1].keys[0], Key::LeftCommand);
         assert_eq!(layers.layers[1].keys[1], Key::V);
         Ok(())
     }
@@ -432,18 +432,18 @@ mod tests {
     fn test_configuration_from_toml() -> Result<()> {
         let toml_str = r#"
             [remaps]
-            caps_lock = "hyper"
+            caps_lock = "left_command"
 
             [layers]
-            layer1 = "hyper"
-            layer2 = "hyper+v"
+            layer1 = "left_command"
+            layer2 = "left_command+v"
 
             [layer1]
             h = { command = "hello" }
             y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
-            a = { remap =  "ctrl+shift+left_arrow"}
-            n = { remap = "ctrl+shift+down_arrow", target_layer = "layer2", description = "These arguments are optional" }
-            esc = { move_layer = "base"}
+            a = { remap =  "left_command+left_arrow"}
+            n = { remap = "left_command+down_arrow", target_layer = "layer2", description = "These arguments are optional" }
+            escape = { move_layer = "base"}
 
             [layer2]
             a = { command = "app_launcher" }

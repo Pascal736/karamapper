@@ -80,16 +80,14 @@ fn remap_to_simple_modification(remap: Remap) -> SimpleModification {
 
 impl From<Key> for SimpleKeyMapping {
     fn from(key: Key) -> Self {
-        SimpleKeyMapping {
-            key_code: key.to_string(),
-        }
+        SimpleKeyMapping { key_code: key }
     }
 }
 
 impl From<Key> for Modifiers {
     fn from(key: Key) -> Self {
         Modifiers {
-            mandatory: Some(vec![key.to_string()]),
+            mandatory: Some(vec![key]),
             optional: None,
         }
     }
@@ -98,7 +96,7 @@ impl From<Key> for Modifiers {
 impl From<Key> for KeyMapping {
     fn from(value: Key) -> Self {
         KeyMapping {
-            key_code: value.to_string(),
+            key_code: value,
             modifiers: None,
         }
     }
@@ -106,13 +104,13 @@ impl From<Key> for KeyMapping {
 
 impl From<Vec<Key>> for KeyMapping {
     fn from(keys: Vec<Key>) -> Self {
-        let key_code = keys.first().unwrap().to_string();
+        let key_code = keys.first().unwrap().clone();
 
         let modifiers = match keys.len() {
             1 => None,
             _ => {
                 let modifiers = Modifiers {
-                    mandatory: Some(keys.iter().skip(1).map(|k| k.to_string()).collect()),
+                    mandatory: Some(keys.iter().skip(1).map(|k| k.clone()).collect()),
                     optional: None,
                 };
 
@@ -147,11 +145,11 @@ mod tests {
             remaps: vec![
                 Remap {
                     from: Key::CapsLock,
-                    to: vec![Key::Hyper],
+                    to: vec![Key::LeftCommand],
                 },
                 Remap {
                     from: Key::V,
-                    to: vec![Key::Hyper, Key::V],
+                    to: vec![Key::LeftCommand, Key::V],
                 },
             ],
         };
@@ -159,20 +157,20 @@ mod tests {
         let simple_modifications = remaps_to_simple_modifications(remaps);
 
         assert_eq!(simple_modifications.len(), 2);
-        assert_eq!(simple_modifications[0].from.key_code, "caps_lock");
+        assert_eq!(simple_modifications[0].from.key_code, Key::CapsLock);
         assert_eq!(simple_modifications[0].to.len(), 1);
-        assert_eq!(simple_modifications[0].to[0].key_code, "hyper");
+        assert_eq!(simple_modifications[0].to[0].key_code, Key::LeftCommand);
 
-        assert_eq!(simple_modifications[1].from.key_code, "v");
+        assert_eq!(simple_modifications[1].from.key_code, Key::V);
         assert_eq!(simple_modifications[1].to.len(), 2);
-        assert_eq!(simple_modifications[1].to[0].key_code, "hyper");
-        assert_eq!(simple_modifications[1].to[1].key_code, "v");
+        assert_eq!(simple_modifications[1].to[0].key_code, Key::LeftCommand);
+        assert_eq!(simple_modifications[1].to[1].key_code, Key::V);
     }
 
     #[test]
     fn test_layer_creates_rule() {
         let name = String::from("layer1");
-        let keys = vec![Key::Hyper];
+        let keys = vec![Key::LeftCommand];
 
         let layer = Layer {
             name: name.clone(),
@@ -183,7 +181,7 @@ mod tests {
         let rule = layer_to_rule(layer);
 
         assert_eq!(rule, expected_rule);
-        assert_eq!(rule.manipulators.from.key_code, "hyper");
+        assert_eq!(rule.manipulators.from.key_code, Key::LeftCommand);
         assert_eq!(rule.manipulators.from.modifiers, None);
         assert_eq!(rule.description, Some("Change to layer1".to_string()));
     }
@@ -191,7 +189,7 @@ mod tests {
     #[test]
     fn test_layer_with_two_keys_creates_rule() {
         let name = String::from("layer1");
-        let keys = vec![Key::Hyper, Key::V];
+        let keys = vec![Key::LeftCommand, Key::V];
 
         let layer = Layer {
             name: name.clone(),
@@ -202,11 +200,11 @@ mod tests {
         let rule = layer_to_rule(layer);
 
         assert_eq!(rule, expected_rule);
-        assert_eq!(rule.manipulators.from.key_code, "hyper");
+        assert_eq!(rule.manipulators.from.key_code, Key::LeftCommand);
         assert_eq!(
             rule.manipulators.from.modifiers,
             Some(Modifiers {
-                mandatory: Some(vec!["v".to_string()]),
+                mandatory: Some(vec![Key::V]),
                 optional: None,
             })
         );
@@ -217,16 +215,18 @@ mod tests {
         let layer_assignment = LayerAssignment {
             layer: Layer {
                 name: "layer1".to_string(),
-                keys: vec![Key::Hyper],
+                keys: vec![Key::LeftCommand],
             },
             key: Key::H,
-            action: Action::LayerRemap(LayerRemap { to: vec![Key::Esc] }),
+            action: Action::LayerRemap(LayerRemap {
+                to: vec![Key::Escape],
+            }),
             next_layer: None,
             description: None,
         };
 
         let expected = Rule {
-            description: Some("Remap h to esc".to_string()),
+            description: Some("Remap H to Escape".to_string()),
             enabled: true,
             manipulators: Manipulator {
                 conditions: Some(vec![Condition {
@@ -235,11 +235,11 @@ mod tests {
                     value: 1,
                 }]),
                 from: KeyMapping {
-                    key_code: "h".to_string(),
+                    key_code: Key::H,
                     modifiers: None,
                 },
                 to: Some(vec![ManipulationTarget::KeyMapping(KeyMapping {
-                    key_code: "esc".to_string(),
+                    key_code: Key::Escape,
                     modifiers: None,
                 })]),
                 manipulator_type: "basic".into(),
@@ -262,7 +262,7 @@ mod tests {
         let layer_assignment = LayerAssignment {
             layer: Layer {
                 name: "layer1".to_string(),
-                keys: vec![Key::Hyper],
+                keys: vec![Key::LeftCommand],
             },
             key: Key::H,
             action: Action::Command(Command {
@@ -282,7 +282,7 @@ mod tests {
                     value: 1,
                 }]),
                 from: KeyMapping {
-                    key_code: "h".to_string(),
+                    key_code: Key::H,
                     modifiers: None,
                 },
                 to: Some(vec![ManipulationTarget::ShellCommand(ShellCommand {
@@ -310,7 +310,7 @@ mod tests {
         let layer_assignment = LayerAssignment {
             layer: Layer {
                 name: "layer1".to_string(),
-                keys: vec![Key::Hyper],
+                keys: vec![Key::LeftCommand],
             },
             key: Key::H,
             action: Action::LayerShift(LayerShift {
@@ -330,7 +330,7 @@ mod tests {
                     value: 1,
                 }]),
                 from: KeyMapping {
-                    key_code: "h".to_string(),
+                    key_code: Key::H,
                     modifiers: None,
                 },
                 to: Some(vec![
