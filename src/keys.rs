@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize, Serializer};
 
-#[derive(Debug, Deserialize, derive_more::Display, strum::EnumString, Clone, PartialEq, Eq)]
+#[derive(Debug, Deserialize, strum::Display, strum::EnumString, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum Key {
     // Sticky Modifier Keys

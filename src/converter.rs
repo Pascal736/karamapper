@@ -6,14 +6,23 @@ pub const BASE_LAYER: &str = "base";
 pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
-    let complex_modifications = ComplexModifications {
-        rules: configuration
-            .layer_assignments
-            .assignments
-            .iter()
-            .map(|a| layer_assignment_to_rule(a.clone()))
-            .collect(),
-    };
+    let mut rules: Vec<Rule> = configuration
+        .layer_assignments
+        .assignments
+        .iter()
+        .map(|a| layer_assignment_to_rule(a.clone()))
+        .collect();
+
+    let layer_rules: Vec<Rule> = configuration
+        .layers
+        .layers
+        .iter()
+        .map(|l| layer_to_rule(l.clone()))
+        .collect();
+
+    rules.extend(layer_rules);
+
+    let complex_modifications = ComplexModifications { rules };
 
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
@@ -181,8 +190,11 @@ mod tests {
         let rule = layer_to_rule(layer);
 
         assert_eq!(rule, expected_rule);
-        assert_eq!(rule.manipulators.from.key_code, Key::LeftCommand);
-        assert_eq!(rule.manipulators.from.modifiers, None);
+        assert_eq!(
+            rule.manipulators.first().unwrap().from.key_code,
+            Key::LeftCommand
+        );
+        assert_eq!(rule.manipulators.first().unwrap().from.modifiers, None);
         assert_eq!(rule.description, Some("Change to layer1".to_string()));
     }
 
@@ -200,9 +212,12 @@ mod tests {
         let rule = layer_to_rule(layer);
 
         assert_eq!(rule, expected_rule);
-        assert_eq!(rule.manipulators.from.key_code, Key::LeftCommand);
         assert_eq!(
-            rule.manipulators.from.modifiers,
+            rule.manipulators.first().unwrap().from.key_code,
+            Key::LeftCommand
+        );
+        assert_eq!(
+            rule.manipulators.first().unwrap().from.modifiers,
             Some(Modifiers {
                 mandatory: Some(vec![Key::V]),
                 optional: None,
@@ -226,9 +241,9 @@ mod tests {
         };
 
         let expected = Rule {
-            description: Some("Remap H to Escape".to_string()),
+            description: Some("Remap h to escape".to_string()),
             enabled: true,
-            manipulators: Manipulator {
+            manipulators: vec![Manipulator {
                 conditions: Some(vec![Condition {
                     name: "layer1".to_string(),
                     condition_type: "variable_if".into(),
@@ -246,7 +261,7 @@ mod tests {
                 to_if_alone: None,
                 to_after_key_up: None,
                 to_delayed_action: None,
-            },
+            }],
         };
 
         let rule = layer_assignment_to_rule(layer_assignment);
@@ -275,7 +290,7 @@ mod tests {
         let expected = Rule {
             description: Some("Run command open -a Terminal".to_string()),
             enabled: true,
-            manipulators: Manipulator {
+            manipulators: vec![Manipulator {
                 conditions: Some(vec![Condition {
                     name: "layer1".to_string(),
                     condition_type: "variable_if".into(),
@@ -293,12 +308,9 @@ mod tests {
                 to_after_key_up: None,
                 to_delayed_action: Some(DelayedAction {
                     to_if_canceled: vec![],
-                    to_if_invoked: vec![SetVariable {
-                        name: "layer1".to_string(),
-                        value: 0,
-                    }],
+                    to_if_invoked: vec![SetVariable::new("layer1".to_string(), 0)],
                 }),
-            },
+            }],
         };
 
         let rule = layer_assignment_to_rule(layer_assignment);
@@ -323,31 +335,21 @@ mod tests {
         let expected = Rule {
             description: Some("Switch to layer2".to_string()),
             enabled: true,
-            manipulators: Manipulator {
-                conditions: Some(vec![Condition {
-                    name: "layer1".to_string(),
-                    condition_type: "variable_if".into(),
-                    value: 1,
-                }]),
+            manipulators: vec![Manipulator {
+                conditions: Some(vec![]),
                 from: KeyMapping {
                     key_code: Key::H,
                     modifiers: None,
                 },
                 to: Some(vec![
-                    ManipulationTarget::SetVariable(SetVariable {
-                        name: "layer2".to_string(),
-                        value: 1,
-                    }),
-                    ManipulationTarget::SetVariable(SetVariable {
-                        name: "layer1".to_string(),
-                        value: 0,
-                    }),
+                    ManipulationTarget::SetVariable(SetVariable::new("layer2".to_string(), 1)),
+                    ManipulationTarget::SetVariable(SetVariable::new("layer1".to_string(), 0)),
                 ]),
                 manipulator_type: "basic".into(),
                 to_if_alone: None,
                 to_after_key_up: None,
                 to_delayed_action: None,
-            },
+            }],
         };
 
         let rule = layer_assignment_to_rule(layer_assignment);

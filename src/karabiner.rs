@@ -25,7 +25,7 @@ pub struct ComplexModifications {
 pub struct Rule {
     pub description: Option<String>,
     pub enabled: bool,
-    pub manipulators: Manipulator,
+    pub manipulators: Vec<Manipulator>,
 }
 
 impl Rule {
@@ -33,7 +33,7 @@ impl Rule {
         Rule {
             description: Some(format!("Change to {}", name.to_lowercase())),
             enabled: true,
-            manipulators: Manipulator::set_environment(name, from),
+            manipulators: vec![Manipulator::set_environment(name, from)],
         }
     }
 
@@ -46,7 +46,12 @@ impl Rule {
         Self {
             description: Some(format!("Remap {} to {}", from.key_code, to.key_code)),
             enabled: true,
-            manipulators: Manipulator::set_keymapping_in_layer(layer, from, to, target_layer),
+            manipulators: vec![Manipulator::set_keymapping_in_layer(
+                layer,
+                from,
+                to,
+                target_layer,
+            )],
         }
     }
 
@@ -59,7 +64,12 @@ impl Rule {
         Self {
             description: Some(format!("Run command {}", to.shell_command)),
             enabled: true,
-            manipulators: Manipulator::set_command_in_layer(layer, from, to, target_layer),
+            manipulators: vec![Manipulator::set_command_in_layer(
+                layer,
+                from,
+                to,
+                target_layer,
+            )],
         }
     }
 
@@ -67,7 +77,7 @@ impl Rule {
         Self {
             description: Some(format!("Switch to {}", target_layer)),
             enabled: true,
-            manipulators: Manipulator::switch_layer(target_layer, source_layer, from),
+            manipulators: vec![Manipulator::switch_layer(target_layer, source_layer, from)],
         }
     }
 }
@@ -132,7 +142,7 @@ impl Manipulator {
     }
     fn switch_layer(target_layer: String, source_layer: String, from: KeyMapping) -> Manipulator {
         Manipulator {
-            conditions: Some(vec![Condition::active(source_layer.clone())]),
+            conditions: Some(vec![]),
             from,
             to: Some(vec![
                 ManipulationTarget::set_active(target_layer),
@@ -196,9 +206,21 @@ pub struct KeyMapping {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct SetVariable {
+pub struct SetVariableValues {
     pub name: String,
     pub value: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct SetVariable {
+    set_variable: SetVariableValues,
+}
+impl SetVariable {
+    pub fn new(name: String, value: i32) -> Self {
+        SetVariable {
+            set_variable: SetVariableValues { name, value },
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -216,10 +238,10 @@ pub enum ManipulationTarget {
 
 impl ManipulationTarget {
     pub fn set_active(name: String) -> Self {
-        ManipulationTarget::SetVariable(SetVariable { name, value: 1 })
+        ManipulationTarget::SetVariable(SetVariable::new(name, 1))
     }
     pub fn set_inactive(name: String) -> Self {
-        ManipulationTarget::SetVariable(SetVariable { name, value: 0 })
+        ManipulationTarget::SetVariable(SetVariable::new(name, 0))
     }
 }
 
@@ -231,19 +253,10 @@ pub struct DelayedAction {
 
 impl DelayedAction {
     fn set_layer(target_layer: String, source_layer: String) -> Self {
-        let mut actions = vec![SetVariable {
-            name: source_layer,
-            value: 0,
-        }];
+        let mut actions = vec![SetVariable::new(source_layer, 0)];
 
         if target_layer != BASE_LAYER {
-            actions.insert(
-                0,
-                SetVariable {
-                    name: target_layer,
-                    value: 1,
-                },
-            );
+            actions.insert(0, SetVariable::new(target_layer, 1));
         }
 
         DelayedAction {

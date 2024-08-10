@@ -9,27 +9,22 @@ use toml::Value;
 fn main() -> anyhow::Result<()> {
     let toml_str = r#"
     [remaps]
-    caps_lock = "left_command"
+    caps_lock = "escape"
 
     [layers]
-    layer1 = "left_command"
-    layer2 = "left_command+v"
+    layer1 = "left_command+left_shift+left_option+left_control+q"
+    layer2 = "left_command+left_shift+left_option+left_control+v"
 
     # By default commands return to the base layer. Remaps remain in the current layer.
     [layer1]
-    h = { command = "hello" }
-    a = { remap =  "ctrl+shift+left_arrow"}
-    y = { remap = "ctrl+shift+up_arrow" }
-    n = { remap = "ctrl+shift+down_arrow", target_layer = "layer2", description = "These arguments are optional" }
-    esc = { move_layer = "base"}
+    s = { command = "open -a 'kitty.app'" }
 
     [layer2]
-    a = { command = "app_launcher" }
+    a = { command = "launchpad" }
     "#;
 
     let toml_value: Value = toml_str.parse()?;
     let config = Configuration::from_toml(&toml_value)?;
-    println!("{:?}", config);
 
     let converted_config = converter::convert_configuration(&config);
 

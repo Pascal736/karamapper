@@ -1,0 +1,167 @@
+{
+  "profiles": [
+    {
+      "complex_modifications": {
+        "rules": [
+          {
+            "description": "Run command open -a 'kitty.app'",
+            "enabled": true,
+            "manipulators": [
+              {
+                "conditions": [
+                  {
+                    "name": "layer1",
+                    "type": "variable_if",
+                    "value": 1
+                  }
+                ],
+                "from": {
+                  "key_code": "s",
+                  "modifiers": null
+                },
+                "to": [
+                  {
+                    "shell_command": "open -a 'kitty.app'"
+                  }
+                ],
+                "to_delayed_action": null,
+                "to_after_key_up": null,
+                "to_if_alone": null,
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Run command launchpad",
+            "enabled": true,
+            "manipulators": [
+              {
+                "conditions": [
+                  {
+                    "name": "layer2",
+                    "type": "variable_if",
+                    "value": 1
+                  }
+                ],
+                "from": {
+                  "key_code": "a",
+                  "modifiers": null
+                },
+                "to": [
+                  {
+                    "shell_command": "launchpad"
+                  }
+                ],
+                "to_delayed_action": null,
+                "to_after_key_up": null,
+                "to_if_alone": null,
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Change to layer1",
+            "enabled": true,
+            "manipulators": [
+              {
+                "conditions": [
+                  {
+                    "name": "layer1",
+                    "type": "variable_if",
+                    "value": 0
+                  }
+                ],
+                "from": {
+                  "key_code": "left_command",
+                  "modifiers": {
+                    "mandatory": [
+                      "left_shift",
+                      "left_option",
+                      "left_control",
+                      "q"
+                    ],
+                    "optional": null
+                  }
+                },
+                "to": [
+                  {
+                    "set_variable": {
+                      "name": "layer1",
+                      "value": 1
+                    }
+                  }
+                ],
+                "to_delayed_action": null,
+                "to_after_key_up": null,
+                "to_if_alone": null,
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Change to layer2",
+            "enabled": true,
+            "manipulators": [
+              {
+                "conditions": [
+                  {
+                    "name": "layer2",
+                    "type": "variable_if",
+                    "value": 0
+                  }
+                ],
+                "from": {
+                  "key_code": "left_command",
+                  "modifiers": {
+                    "mandatory": [
+                      "left_shift",
+                      "left_option",
+                      "left_control",
+                      "v"
+                    ],
+                    "optional": null
+                  }
+                },
+                "to": [
+                  {
+                    "set_variable": {
+                      "name": "layer2",
+                      "value": 1
+                    }
+                  }
+                ],
+                "to_delayed_action": null,
+                "to_after_key_up": null,
+                "to_if_alone": null,
+                "type": "basic"
+              }
+            ]
+          }
+        ]
+      },
+      "devices": [
+        {
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 0,
+            "vendor_id": 0
+          },
+          "simple_modifications": [
+            {
+              "from": {
+                "key_code": "caps_lock"
+              },
+              "to": [
+                {
+                  "key_code": "escape"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "Default",
+      "selected": true
+    }
+  ]
+}
