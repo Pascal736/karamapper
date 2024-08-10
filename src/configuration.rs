@@ -55,17 +55,17 @@ pub enum Action {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct LayerAssingment {
-    layer: Layer,
-    key: Key,
-    action: Action,
-    next_layer: Option<Layer>,
-    description: Option<String>,
+pub struct LayerAssignment {
+    pub layer: Layer,
+    pub key: Key,
+    pub action: Action,
+    pub next_layer: Option<Layer>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct LayerAssignments {
-    pub assignments: Vec<LayerAssingment>,
+    pub assignments: Vec<LayerAssignment>,
 }
 
 impl Remaps {
@@ -170,7 +170,7 @@ impl Action {
     }
 }
 
-impl LayerAssingment {
+impl LayerAssignment {
     pub fn from_toml(value: &Value, layer: Layer) -> Result<Vec<Self>> {
         let mut assignments = Vec::new();
         let table = value
@@ -191,7 +191,7 @@ impl LayerAssingment {
                 .and_then(|v| v.as_str())
                 .map(String::from);
 
-            assignments.push(LayerAssingment {
+            assignments.push(LayerAssignment {
                 layer: layer.clone(),
                 key,
                 action,
@@ -206,10 +206,10 @@ impl LayerAssingment {
 
 impl LayerAssignments {
     pub fn from_toml(value: &Value, layers: Vec<Layer>) -> Result<Self> {
-        let mut assignments: Vec<LayerAssingment> = vec![];
+        let mut assignments: Vec<LayerAssignment> = vec![];
         for layer in layers.into_iter() {
             let assignment_value = Self::get_assignments_for_layer(&layer.clone().name, value)?;
-            let assignments_layer = LayerAssingment::from_toml(&assignment_value, layer)?;
+            let assignments_layer = LayerAssignment::from_toml(&assignment_value, layer)?;
             assignments.extend(assignments_layer);
         }
         Ok(Self { assignments })
@@ -259,7 +259,7 @@ mod tests {
             keys: vec![Key::Hyper],
         };
 
-        let expected = vec![LayerAssingment {
+        let expected = vec![LayerAssignment {
             layer: layer.clone(),
             key: Key::H,
             action: Action::Command(Command {
@@ -269,7 +269,7 @@ mod tests {
             description: None,
         }];
         let toml_value: Value = toml_str.parse()?;
-        let layer_assignment = LayerAssingment::from_toml(&toml_value, layer)?;
+        let layer_assignment = LayerAssignment::from_toml(&toml_value, layer)?;
 
         assert_eq!(layer_assignment, expected);
 
@@ -286,7 +286,7 @@ mod tests {
             keys: vec![Key::Hyper],
         };
 
-        let expected = vec![LayerAssingment {
+        let expected = vec![LayerAssignment {
             layer: layer.clone(),
             key: Key::H,
             action: Action::LayerRemap(LayerRemap {
@@ -296,7 +296,7 @@ mod tests {
             description: None,
         }];
         let toml_value: Value = toml_str.parse()?;
-        let layer_assignment = LayerAssingment::from_toml(&toml_value, layer)?;
+        let layer_assignment = LayerAssignment::from_toml(&toml_value, layer)?;
 
         assert_eq!(layer_assignment, expected);
 
@@ -355,7 +355,7 @@ mod tests {
 
         let expected = LayerAssignments {
             assignments: vec![
-                LayerAssingment {
+                LayerAssignment {
                     layer: layer1.clone(),
                     key: Key::H,
                     action: Action::Command(Command {
@@ -364,7 +364,7 @@ mod tests {
                     next_layer: None,
                     description: None,
                 },
-                LayerAssingment {
+                LayerAssignment {
                     layer: layer1.clone(),
                     key: Key::Y,
                     action: Action::Command(Command {
@@ -373,7 +373,7 @@ mod tests {
                     next_layer: None,
                     description: None,
                 },
-                LayerAssingment {
+                LayerAssignment {
                     layer: layer2.clone(),
                     key: Key::A,
                     action: Action::Command(Command {

@@ -10,6 +10,18 @@ pub fn layer_to_rule(layer: Layer) -> Rule {
     Rule::set_environment(layer.name, layer.keys.into())
 }
 
+fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
+    match layer_assignment.action {
+        Action::LayerRemap(remaps) => Rule::set_keymapping_in_layer(
+            layer_assignment.layer.name,
+            layer_assignment.key.into(),
+            remaps.to.into(),
+            None,
+        ),
+        _ => todo!(),
+    }
+}
+
 fn remaps_to_simple_modifications(remaps: Remaps) -> Vec<SimpleModification> {
     remaps
         .remaps
@@ -78,6 +90,7 @@ impl From<Vec<Key>> for KeyMapping {
 mod tests {
 
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_remaps_to_simple_modifications() {
@@ -148,5 +161,90 @@ mod tests {
                 optional: None,
             })
         );
+    }
+
+    #[test]
+    fn test_layer_assignment_to_remap() {
+        let layer_assignment = LayerAssignment {
+            layer: Layer {
+                name: "layer1".to_string(),
+                keys: vec![Key::Hyper],
+            },
+            key: Key::H,
+            action: Action::LayerRemap(LayerRemap { to: vec![Key::Esc] }),
+            next_layer: None,
+            description: None,
+        };
+
+        let expected = Rule {
+            description: Some("Remap h to esc".to_string()),
+            enabled: true,
+            manipulators: Manipulator {
+                conditions: Some(vec![Condition {
+                    name: "layer1".to_string(),
+                    condition_type: "variable_if".into(),
+                    value: 1,
+                }]),
+                from: KeyMapping {
+                    key_code: "h".to_string(),
+                    modifiers: None,
+                },
+                to: Some(vec![KeyMappingOrSetVariable::KeyMapping(KeyMapping {
+                    key_code: "esc".to_string(),
+                    modifiers: None,
+                })]),
+                manipulator_type: "basic".into(),
+                to_if_alone: None,
+                to_after_key_up: None,
+                to_delayed_action: None,
+            },
+        };
+
+        let rule = layer_assignment_to_rule(layer_assignment);
+
+        assert_eq!(rule, expected);
+    }
+    #[test]
+    fn test_layer_assignment_to_command() {
+        let layer_assignment = LayerAssignment {
+            layer: Layer {
+                name: "layer1".to_string(),
+                keys: vec![Key::Hyper],
+            },
+            key: Key::H,
+            action: Action::Command(Command {
+                value: String::from("open -a Terminal"),
+            }),
+            next_layer: None,
+            description: None,
+        };
+
+        let expected = Rule {
+            description: Some("Run command open -a Terminal".to_string()),
+            enabled: true,
+            manipulators: Manipulator {
+                conditions: Some(vec![Condition {
+                    name: "layer1".to_string(),
+                    condition_type: "variable_if".into(),
+                    value: 1,
+                }]),
+                from: KeyMapping {
+                    key_code: "h".to_string(),
+                    modifiers: None,
+                },
+                to: Some(vec![KeyMappingOrSetVariable::KeyMapping(KeyMapping {
+                    key_code: "esc".to_string(),
+                    modifiers: None,
+                })]),
+                manipulator_type: "basic".into(),
+                to_if_alone: None,
+                to_after_key_up: None,
+                to_delayed_action: None,
+            },
+        };
+
+        let rule = layer_assignment_to_rule(layer_assignment);
+
+        assert_eq!(rule, expected);
     }
 }

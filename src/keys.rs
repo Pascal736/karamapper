@@ -39,7 +39,7 @@ impl Key {
             Key::UpArrow => "up_arrow".to_string(),
             Key::DownArrow => "down_arrow".to_string(),
             Key::CapsLock => "caps_lock".to_string(),
-            Key::Esc => "escape".to_string(),
+            Key::Esc => "esc".to_string(),
         }
     }
 }

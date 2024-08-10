@@ -33,6 +33,19 @@ impl Rule {
             manipulators: Manipulator::set_environment(name, from),
         }
     }
+
+    pub fn set_keymapping_in_layer(
+        layer: String,
+        from: KeyMapping,
+        to: KeyMapping,
+        target_layer: Option<String>,
+    ) -> Self {
+        Self {
+            description: Some(format!("Remap {} to {}", from.key_code, to.key_code)),
+            enabled: true,
+            manipulators: Manipulator::set_keymapping_in_layer(layer, from, to, target_layer),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -53,6 +66,23 @@ impl Manipulator {
             conditions: Some(vec![Condition::inactive(name.clone())]),
             from,
             to: Some(vec![KeyMappingOrSetVariable::set_active(name)]),
+            to_delayed_action: None,
+            to_after_key_up: None,
+            to_if_alone: None,
+            manipulator_type: "basic".to_string(),
+        }
+    }
+
+    pub fn set_keymapping_in_layer(
+        layer: String,
+        from: KeyMapping,
+        to: KeyMapping,
+        target_layer: Option<String>,
+    ) -> Self {
+        Manipulator {
+            conditions: Some(vec![Condition::active(layer.clone())]),
+            from,
+            to: Some(vec![KeyMappingOrSetVariable::KeyMapping(to)]),
             to_delayed_action: None,
             to_after_key_up: None,
             to_if_alone: None,
