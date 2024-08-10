@@ -257,6 +257,16 @@ pub struct Device {
     pub simple_modifications: Vec<SimpleModification>,
 }
 
+impl Default for DeviceIdentifiers {
+    fn default() -> Self {
+        DeviceIdentifiers {
+            is_keyboard: true,
+            product_id: 0,
+            vendor_id: 0,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct DeviceIdentifiers {
     pub is_keyboard: bool,

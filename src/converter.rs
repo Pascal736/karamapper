@@ -3,9 +3,38 @@ use crate::karabiner::*;
 use crate::keys::Key;
 
 pub const BASE_LAYER: &str = "base";
+pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
-    todo!()
+    let complex_modifications = ComplexModifications {
+        rules: configuration
+            .layer_assignments
+            .assignments
+            .iter()
+            .map(|a| layer_assignment_to_rule(a.clone()))
+            .collect(),
+    };
+
+    let devices = vec![Device {
+        identifiers: DeviceIdentifiers::default(),
+        simple_modifications: configuration
+            .remaps
+            .remaps
+            .iter()
+            .map(|r| remap_to_simple_modification(r.clone()))
+            .collect(),
+    }];
+    let name = DEFAULT_PROFILE_NAME.to_string();
+    let selected = true;
+
+    Profiles {
+        profiles: vec![Profile {
+            complex_modifications,
+            devices,
+            name,
+            selected,
+        }],
+    }
 }
 
 pub fn layer_to_rule(layer: Layer) -> Rule {

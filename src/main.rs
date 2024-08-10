@@ -29,7 +29,12 @@ fn main() -> anyhow::Result<()> {
 
     let toml_value: Value = toml_str.parse()?;
     let config = Configuration::from_toml(&toml_value)?;
-
     println!("{:?}", config);
+
+    let converted_config = converter::convert_configuration(&config);
+
+    let json = serde_json::to_string_pretty(&converted_config)?;
+    println!("{}", json);
+
     Ok(())
 }
