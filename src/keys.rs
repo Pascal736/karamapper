@@ -14,8 +14,10 @@ pub enum Key {
     N,
     Ctrl,
     Shift,
-    DownArrow,
     LeftArrow,
+    RightArrow,
+    UpArrow,
+    DownArrow,
     CapsLock,
     Esc,
 }
@@ -32,8 +34,10 @@ impl Key {
             Key::N => "n".to_string(),
             Key::Ctrl => "ctrl".to_string(),
             Key::Shift => "shift".to_string(),
-            Key::DownArrow => "down_arrow".to_string(),
             Key::LeftArrow => "left_arrow".to_string(),
+            Key::RightArrow => "right_arrow".to_string(),
+            Key::UpArrow => "up_arrow".to_string(),
+            Key::DownArrow => "down_arrow".to_string(),
             Key::CapsLock => "caps_lock".to_string(),
             Key::Esc => "escape".to_string(),
         }

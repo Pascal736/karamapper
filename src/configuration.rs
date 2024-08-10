@@ -209,7 +209,6 @@ impl LayerAssignments {
         let mut assignments: Vec<LayerAssingment> = vec![];
         for layer in layers.into_iter() {
             let assignment_value = Self::get_assignments_for_layer(&layer.clone().name, value)?;
-            println!("Found layer: {:?}", assignment_value);
             let assignments_layer = LayerAssingment::from_toml(&assignment_value, layer)?;
             assignments.extend(assignments_layer);
         }
@@ -385,11 +384,7 @@ mod tests {
                 },
             ],
         };
-
-        println!("{:?}", layer_assignments.assignments);
-
         assert_eq!(layer_assignments, expected);
-
         Ok(())
     }
 
