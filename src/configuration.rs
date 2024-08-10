@@ -39,7 +39,7 @@ pub struct Command {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct LayerShift {
-    move_layer: String,
+    pub move_layer: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]

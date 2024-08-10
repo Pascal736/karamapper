@@ -26,7 +26,11 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
             command.into(),
             layer_assignment.next_layer.map(|l| l.name),
         ),
-        _ => todo!(),
+        Action::LayerShift(layer) => Rule::switch_layer(
+            layer.move_layer,
+            layer_assignment.layer.name,
+            layer_assignment.key.into(),
+        ),
     }
 }
 
@@ -265,6 +269,55 @@ mod tests {
                         value: 0,
                     }],
                 }),
+            },
+        };
+
+        let rule = layer_assignment_to_rule(layer_assignment);
+
+        assert_eq!(rule, expected);
+    }
+    #[test]
+    fn test_layer_assignment_to_layer_change() {
+        let layer_assignment = LayerAssignment {
+            layer: Layer {
+                name: "layer1".to_string(),
+                keys: vec![Key::Hyper],
+            },
+            key: Key::H,
+            action: Action::LayerShift(LayerShift {
+                move_layer: "layer2".into(),
+            }),
+            next_layer: None,
+            description: None,
+        };
+
+        let expected = Rule {
+            description: Some("Switch to layer2".to_string()),
+            enabled: true,
+            manipulators: Manipulator {
+                conditions: Some(vec![Condition {
+                    name: "layer1".to_string(),
+                    condition_type: "variable_if".into(),
+                    value: 1,
+                }]),
+                from: KeyMapping {
+                    key_code: "h".to_string(),
+                    modifiers: None,
+                },
+                to: Some(vec![
+                    ManipulationTarget::SetVariable(SetVariable {
+                        name: "layer2".to_string(),
+                        value: 1,
+                    }),
+                    ManipulationTarget::SetVariable(SetVariable {
+                        name: "layer1".to_string(),
+                        value: 0,
+                    }),
+                ]),
+                manipulator_type: "basic".into(),
+                to_if_alone: None,
+                to_after_key_up: None,
+                to_delayed_action: None,
             },
         };
 

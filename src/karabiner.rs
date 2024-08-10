@@ -60,6 +60,14 @@ impl Rule {
             manipulators: Manipulator::set_command_in_layer(layer, from, to, target_layer),
         }
     }
+
+    pub fn switch_layer(target_layer: String, source_layer: String, from: KeyMapping) -> Self {
+        Self {
+            description: Some(format!("Switch to {}", target_layer)),
+            enabled: true,
+            manipulators: Manipulator::switch_layer(target_layer, source_layer, from),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -115,6 +123,20 @@ impl Manipulator {
             from,
             to: Some(vec![ManipulationTarget::ShellCommand(to)]),
             to_delayed_action: set_target_layer(target_layer, layer),
+            to_after_key_up: None,
+            to_if_alone: None,
+            manipulator_type: "basic".to_string(),
+        }
+    }
+    fn switch_layer(target_layer: String, source_layer: String, from: KeyMapping) -> Manipulator {
+        Manipulator {
+            conditions: Some(vec![Condition::active(source_layer.clone())]),
+            from,
+            to: Some(vec![
+                ManipulationTarget::set_active(target_layer),
+                ManipulationTarget::set_inactive(source_layer),
+            ]),
+            to_delayed_action: None,
             to_after_key_up: None,
             to_if_alone: None,
             manipulator_type: "basic".to_string(),
@@ -193,6 +215,9 @@ pub enum ManipulationTarget {
 impl ManipulationTarget {
     pub fn set_active(name: String) -> Self {
         ManipulationTarget::SetVariable(SetVariable { name, value: 1 })
+    }
+    pub fn set_inactive(name: String) -> Self {
+        ManipulationTarget::SetVariable(SetVariable { name, value: 0 })
     }
 }
 
