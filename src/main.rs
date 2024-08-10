@@ -17,7 +17,8 @@ fn main() -> anyhow::Result<()> {
 
     # By default commands return to the base layer. Remaps remain in the current layer.
     [layer1]
-    s = { command = "Open -a '1Password.app'", target_layer= "layer2" }
+    s = { command = "Open -a '1Password.app'", next_layer= "base" }
+    caps_lock = { remap = "left_shift+left_command+left_option+left_control"}
 
     [layer2]
     a = { command = "launchpad" }

@@ -59,7 +59,7 @@ pub struct LayerAssignment {
     pub layer: Layer,
     pub key: Key,
     pub action: Action,
-    pub next_layer: Option<Layer>,
+    pub next_layer: Option<String>,
     pub description: Option<String>,
 }
 
@@ -187,8 +187,7 @@ impl LayerAssignment {
             let next_layer = value
                 .get("next_layer")
                 .and_then(|v| v.as_str())
-                .map(String::from)
-                .map(|name| Layer { name, keys: vec![] });
+                .map(String::from);
 
             let description = value
                 .get("description")
@@ -374,7 +373,7 @@ mod tests {
                     action: Action::Command(Command {
                         value: String::from("hello2"),
                     }),
-                    next_layer: Some(layer1.clone()),
+                    next_layer: Some(layer1.clone().name),
                     description: Some(String::from("These arguments are optional")),
                 },
                 LayerAssignment {

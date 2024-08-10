@@ -6,23 +6,23 @@ pub const BASE_LAYER: &str = "base";
 pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
-    let mut rules: Vec<Rule> = configuration
-        .layer_assignments
-        .assignments
-        .iter()
-        .map(|a| layer_assignment_to_rule(a.clone()))
-        .collect();
-
-    let layer_rules: Vec<Rule> = configuration
+    let mut layer_rules: Vec<Rule> = configuration
         .layers
         .layers
         .iter()
         .map(|l| layer_to_rule(l.clone()))
         .collect();
 
-    rules.extend(layer_rules);
+    let rules: Vec<Rule> = configuration
+        .layer_assignments
+        .assignments
+        .iter()
+        .map(|a| layer_assignment_to_rule(a.clone()))
+        .collect();
 
-    let complex_modifications = ComplexModifications { rules };
+    layer_rules.extend(rules);
+
+    let complex_modifications = ComplexModifications { rules: layer_rules };
 
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
@@ -62,7 +62,7 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
             layer_assignment.layer.name,
             layer_assignment.key.into(),
             command.into(),
-            layer_assignment.next_layer.map(|l| l.name),
+            layer_assignment.next_layer,
         ),
         Action::LayerShift(layer) => Rule::switch_layer(
             layer.move_layer,
@@ -194,8 +194,12 @@ mod tests {
             rule.manipulators.first().unwrap().from.key_code,
             Key::LeftCommand
         );
-        assert_eq!(rule.manipulators.first().unwrap().from.modifiers, None);
+        assert_eq!(
+            rule.manipulators.clone().first().unwrap().from.modifiers,
+            None
+        );
         assert_eq!(rule.description, Some("Change to layer1".to_string()));
+        assert_eq!(rule.manipulators.first().unwrap().conditions, Some(vec![]));
     }
 
     #[test]
@@ -283,7 +287,7 @@ mod tests {
             action: Action::Command(Command {
                 value: String::from("open -a Terminal"),
             }),
-            next_layer: Some(base_layer),
+            next_layer: Some(base_layer.name),
             description: None,
         };
 

@@ -100,7 +100,7 @@ pub struct Manipulator {
 impl Manipulator {
     pub fn set_environment(name: String, from: KeyMapping) -> Self {
         Manipulator {
-            conditions: Some(vec![Condition::inactive(name.clone())]),
+            conditions: Some(vec![]),
             from,
             to: Some(vec![ManipulationTarget::set_active(name)]),
             to_delayed_action: None,
@@ -199,6 +199,7 @@ pub struct SimpleKeyMapping {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Modifiers {
     pub mandatory: Option<Vec<Key>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub optional: Option<Vec<Key>>,
 }
 
