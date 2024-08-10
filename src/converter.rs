@@ -123,6 +123,7 @@ mod tests {
         assert_eq!(rule, expected_rule);
         assert_eq!(rule.manipulators.from.key_code, "hyper");
         assert_eq!(rule.manipulators.from.modifiers, None);
+        assert_eq!(rule.description, Some("Change to layer1".to_string()));
     }
 
     #[test]
