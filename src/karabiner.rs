@@ -97,7 +97,7 @@ impl Manipulator {
             conditions: Some(vec![Condition::active(layer.clone())]),
             from,
             to: Some(vec![ManipulationTarget::KeyMapping(to)]),
-            to_delayed_action: None,
+            to_delayed_action: set_target_layer(target_layer, layer),
             to_after_key_up: None,
             to_if_alone: None,
             manipulator_type: "basic".to_string(),
@@ -204,28 +204,24 @@ pub struct DelayedAction {
 
 impl DelayedAction {
     fn set_layer(target_layer: String, source_layer: String) -> Self {
-        if target_layer == BASE_LAYER {
-            return DelayedAction {
-                to_if_canceled: vec![],
-                to_if_invoked: vec![SetVariable {
-                    name: source_layer,
-                    value: 0,
-                }],
-            };
-        }
+        let mut actions = vec![SetVariable {
+            name: source_layer,
+            value: 0,
+        }];
 
-        DelayedAction {
-            to_if_canceled: vec![],
-            to_if_invoked: vec![
+        if target_layer != BASE_LAYER {
+            actions.insert(
+                0,
                 SetVariable {
                     name: target_layer,
                     value: 1,
                 },
-                SetVariable {
-                    name: source_layer,
-                    value: 0,
-                },
-            ],
+            );
+        }
+
+        DelayedAction {
+            to_if_canceled: vec![],
+            to_if_invoked: actions,
         }
     }
 }
