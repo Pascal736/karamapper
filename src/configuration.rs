@@ -355,6 +355,7 @@ mod tests {
 
             [layer1]
             a = { remap = "b", next_layer = "baselayer" }
+            escape = { next_layer= "baselayer" }
             "#;
 
         let layer1 = Layer {
@@ -515,9 +516,9 @@ mod tests {
 
             [layer1]
             h = { command = "hello" }
-            y = { command = "hello2", target_layer = "baselayer", description = "These arguments are optional" }
+            y = { command = "hello2", next_layer= "baselayer", description = "These arguments are optional" }
             a = { remap =  "left_command+left_arrow"}
-            n = { remap = "left_command+down_arrow", target_layer = "layer2", description = "These arguments are optional" }
+            n = { remap = "left_command+down_arrow", next_layer= "layer2", description = "These arguments are optional" }
             escape = { move_layer = "baselayer"}
 
             [layer2]
