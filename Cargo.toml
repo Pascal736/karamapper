@@ -13,10 +13,9 @@ authors = ["Pascal Pfeiffer <PaPfeiffer@proton.me>"]
 name = "karamapper"
 path = "src/cli.rs"
 
-
 [dependencies]
 anyhow = "1.0.86"
-clap = "4.5.15"
+clap = { version = "4.5.15", features = ["derive"] }
 derive_more = { version = "1.0.0", features = ["display"] }
 pretty_assertions = "1.4.0"
 serde = { version = "1.0.205", features = ["derive"] }
