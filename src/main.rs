@@ -17,6 +17,7 @@ fn main() -> anyhow::Result<()> {
     [layers]
     layer1 = "l+left_command+left_shift+left_option+left_control"
     layer2 = "v+left_command+left_shift+left_option+left_control"
+    layer3 = "m+left_command+left_shift+left_option+left_control"
 
     [layer1]
     escape = { move_layer= "baselayer" }
@@ -33,7 +34,17 @@ fn main() -> anyhow::Result<()> {
     [layer2]
     escape = { move_layer= "baselayer" }
     m = { remap = "m+left_command", next_layer= "baselayer", description="Minimize Window" }
-    t = { remap ="left_option+left_shift+spacebar", description = "Toggle Window Layout" }
+    t = { remap ="spacebar+left_option+left_shift", description = "Toggle Window Layout" }
+    h = { remap = "k+left_shift+left_option", description = "Move Foucs left"}
+    l = { remap = "j+left_shift+left_option", description = "Move Foucs Right"}
+    y = { remap = "p+left_shift+left_option", description = "Move Foucs Left Screen"}
+    o = { remap = "n+left_shift+left_option", description = "Move Foucs Right Screen"}
+
+    [layer3]
+    escape = { move_layer= "baselayer" }
+    key1 = { remap = "key1+left_control+left_shift+left_option+left_control", next_layer= "baselayer", description = "Move to Space 1" }
+    key2 = { remap = "key2+left_control+left_shift+left_option+left_control", next_layer= "baselayer", description = "Move to Space 2" }
+
     "#;
 
     let toml_value: Value = toml_str.parse()?;

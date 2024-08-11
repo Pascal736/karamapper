@@ -267,6 +267,20 @@ impl Serialize for Key {
                 let lowercase = format!("{}", self).to_lowercase();
                 serializer.serialize_str(&lowercase)
             }
+
+            Key::Key0
+            | Key::Key1
+            | Key::Key2
+            | Key::Key3
+            | Key::Key4
+            | Key::Key5
+            | Key::Key6
+            | Key::Key7
+            | Key::Key8
+            | Key::Key9 => {
+                let digit = format!("{}", self).chars().nth(3).unwrap();
+                serializer.serialize_str(&digit.to_string())
+            }
             _ => {
                 let snake_case = format!("{}", self);
                 serializer.serialize_str(&snake_case)
