@@ -26,12 +26,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
 
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
-        simple_modifications: configuration
-            .simple_remaps
-            .remaps
-            .iter()
-            .map(|r| remap_to_simple_modification(r.clone()))
-            .collect(),
+        simple_modifications: remaps_to_simple_modifications(configuration.simple_remaps.clone()),
     }];
     let name = DEFAULT_PROFILE_NAME.to_string();
     let selected = true;
@@ -356,7 +351,11 @@ mod tests {
             description: Some("Switch to layer2".to_string()),
             enabled: true,
             manipulators: vec![Manipulator {
-                conditions: Some(vec![]),
+                conditions: Some(vec![Condition {
+                    name: "layer1".to_string(),
+                    condition_type: "variable_if".into(),
+                    value: 1,
+                }]),
                 from: FromKeyMapping {
                     key_code: Key::H,
                     modifiers: None,
