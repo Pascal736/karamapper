@@ -26,12 +26,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
 
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
-        simple_modifications: configuration
-            .simple_remaps
-            .remaps
-            .iter()
-            .map(|r| remap_to_simple_modification(r.clone()))
-            .collect(),
+        simple_modifications: remaps_to_simple_modifications(configuration.simple_remaps.clone()),
     }];
     let name = DEFAULT_PROFILE_NAME.to_string();
     let selected = true;
