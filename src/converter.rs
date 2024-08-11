@@ -2,7 +2,6 @@ use crate::configuration::*;
 use crate::karabiner::*;
 use crate::keys::Key;
 
-pub const BASE_LAYER: &str = "base";
 pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
@@ -10,6 +9,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
         .layers
         .layers
         .iter()
+        .filter(|l| l.name != BASE_LAYER)
         .map(|l| layer_to_rule(l.clone()))
         .collect();
 
@@ -27,7 +27,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
         simple_modifications: configuration
-            .remaps
+            .simple_remaps
             .remaps
             .iter()
             .map(|r| remap_to_simple_modification(r.clone()))
@@ -56,7 +56,7 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
             layer_assignment.layer.name,
             layer_assignment.key.into(),
             remaps.to.into(),
-            None,
+            layer_assignment.next_layer,
         ),
         Action::Command(command) => Rule::set_command_in_layer(
             layer_assignment.layer.name,
@@ -72,7 +72,7 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
     }
 }
 
-fn remaps_to_simple_modifications(remaps: Remaps) -> Vec<SimpleModification> {
+fn remaps_to_simple_modifications(remaps: SimpleRemaps) -> Vec<SimpleModification> {
     remaps
         .remaps
         .iter()
@@ -80,7 +80,7 @@ fn remaps_to_simple_modifications(remaps: Remaps) -> Vec<SimpleModification> {
         .collect()
 }
 
-fn remap_to_simple_modification(remap: Remap) -> SimpleModification {
+fn remap_to_simple_modification(remap: SimpleRemap) -> SimpleModification {
     SimpleModification {
         from: remap.from.into(),
         to: remap.to.iter().map(|k| k.clone().into()).collect(),
@@ -163,13 +163,13 @@ mod tests {
 
     #[test]
     fn test_remaps_to_simple_modifications() {
-        let remaps = Remaps {
+        let remaps = SimpleRemaps {
             remaps: vec![
-                Remap {
+                SimpleRemap {
                     from: Key::CapsLock,
                     to: vec![Key::LeftCommand],
                 },
-                Remap {
+                SimpleRemap {
                     from: Key::V,
                     to: vec![Key::LeftCommand, Key::V],
                 },
@@ -253,7 +253,7 @@ mod tests {
             action: Action::LayerRemap(LayerRemap {
                 to: vec![Key::Escape, Key::LeftShift],
             }),
-            next_layer: None,
+            next_layer: Some(BASE_LAYER.to_string()),
             description: None,
         };
 
@@ -277,7 +277,10 @@ mod tests {
                 manipulator_type: "basic".into(),
                 to_if_alone: None,
                 to_after_key_up: None,
-                to_delayed_action: None,
+                to_delayed_action: Some(DelayedAction {
+                    to_if_invoked: vec![SetVariable::new("layer1".to_string(), 0)],
+                    to_if_canceled: vec![],
+                }),
             }],
         };
 

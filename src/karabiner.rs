@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::converter::BASE_LAYER;
+use crate::configuration::BASE_LAYER;
 use crate::keys::Key;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -116,8 +116,13 @@ impl Manipulator {
         to: ToKeyMapping,
         target_layer: Option<String>,
     ) -> Self {
+        let conditions = if Self::is_base_layer(&layer) {
+            Some(vec![])
+        } else {
+            Some(vec![Condition::active(layer.clone())])
+        };
         Manipulator {
-            conditions: Some(vec![Condition::active(layer.clone())]),
+            conditions,
             from,
             to: Some(vec![ManipulationTarget::KeyMapping(to)]),
             to_delayed_action: set_target_layer(target_layer, layer),
@@ -160,6 +165,10 @@ impl Manipulator {
             to_if_alone: None,
             manipulator_type: "basic".to_string(),
         }
+    }
+
+    fn is_base_layer(name: &str) -> bool {
+        name == BASE_LAYER
     }
 }
 
