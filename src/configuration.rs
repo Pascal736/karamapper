@@ -4,6 +4,8 @@ use toml::Value;
 
 use crate::keys::Key;
 
+pub const BASE_LAYER: &str = "baselayer";
+
 #[derive(Debug, Clone)]
 pub struct Configuration {
     pub simple_remaps: SimpleRemaps,
@@ -134,6 +136,7 @@ impl Configuration {
             .get("layers")
             .context("Missing layers in configuration")?;
         let layers = Layers::from_toml(layers)?;
+        let layers = Self::add_base_layer(layers);
 
         let layer_assignments = LayerAssignments::from_toml(value, layers.layers.clone())?;
 
@@ -142,6 +145,15 @@ impl Configuration {
             layers,
             layer_assignments,
         })
+    }
+
+    fn add_base_layer(mut layers: Layers) -> Layers {
+        let base_layer = Layer {
+            name: BASE_LAYER.to_string(),
+            keys: Vec::new(),
+        };
+        layers.layers.insert(0, base_layer);
+        layers
     }
 }
 
@@ -311,7 +323,7 @@ mod tests {
         let toml_str = r#"
             [layer1]
             h = { command = "hello" }
-            y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
+            y = { command = "hello2", target_layer = "baselayer", description = "These arguments are optional" }
             a = { remap =  "left_command+shift+left_arrow"}
 
             [layer2]
@@ -319,7 +331,7 @@ mod tests {
             "#;
         let expected_toml = toml::toml! {
             h = { command = "hello" }
-            y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
+            y = { command = "hello2", target_layer = "baselayer", description = "These arguments are optional" }
             a = { remap =  "left_command+shift+left_arrow"}
         };
         let layer_name = "layer1";
@@ -331,6 +343,65 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_base_layer_assignments_get_parsed() -> anyhow::Result<()> {
+        let toml_str = r#"
+            [baselayer]
+            caps_lock = { remap =  "left_command+left_shift+left_option+left_control"}
+
+            [layers]
+            layer1 = "q+left_command+left_shift+left_option+left_control"
+
+            [layer1]
+            a = { command = "app_launcher" }
+            "#;
+
+        let layer1 = Layer {
+            name: "layer1".to_string(),
+            keys: vec![Key::LeftCommand],
+        };
+
+        let layer = Layer {
+            name: "baselayer".to_string(),
+            keys: vec![Key::CapsLock],
+        };
+        let layers = vec![layer.clone(), layer1.clone()];
+
+        let toml_value: Value = toml_str.parse()?;
+        let layer_assignments = LayerAssignments::from_toml(&toml_value, layers)?;
+
+        let expected = LayerAssignments {
+            assignments: vec![
+                LayerAssignment {
+                    layer: layer.clone(),
+                    key: Key::CapsLock,
+                    action: Action::LayerRemap(LayerRemap {
+                        to: vec![
+                            Key::LeftCommand,
+                            Key::LeftShift,
+                            Key::LeftOption,
+                            Key::LeftControl,
+                        ],
+                    }),
+                    next_layer: None,
+                    description: None,
+                },
+                LayerAssignment {
+                    layer: layer1.clone(),
+                    key: Key::A,
+                    action: Action::Command(Command {
+                        value: String::from("app_launcher"),
+                    }),
+                    next_layer: None,
+                    description: None,
+                },
+            ],
+        };
+        assert_eq!(layer_assignments, expected);
+        Ok(())
+    }
+
     #[test]
     fn test_parse_layers_assignments() -> anyhow::Result<()> {
         let toml_str = r#"
@@ -437,16 +508,19 @@ mod tests {
             [simple_remaps]
             caps_lock = "left_command"
 
+            [baselayer]
+            caps_lock = {remap = "left_command+left_shift+left_option+left_control"}
+
             [layers]
             layer1 = "left_command"
             layer2 = "left_command+v"
 
             [layer1]
             h = { command = "hello" }
-            y = { command = "hello2", target_layer = "base", description = "These arguments are optional" }
+            y = { command = "hello2", target_layer = "baselayer", description = "These arguments are optional" }
             a = { remap =  "left_command+left_arrow"}
             n = { remap = "left_command+down_arrow", target_layer = "layer2", description = "These arguments are optional" }
-            escape = { move_layer = "base"}
+            escape = { move_layer = "baselayer"}
 
             [layer2]
             a = { command = "app_launcher" }

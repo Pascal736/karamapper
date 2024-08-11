@@ -2,7 +2,6 @@ use crate::configuration::*;
 use crate::karabiner::*;
 use crate::keys::Key;
 
-pub const BASE_LAYER: &str = "base";
 pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
 pub fn convert_configuration(configuration: &Configuration) -> Profiles {
@@ -10,6 +9,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
         .layers
         .layers
         .iter()
+        .filter(|l| l.name != BASE_LAYER)
         .map(|l| layer_to_rule(l.clone()))
         .collect();
 

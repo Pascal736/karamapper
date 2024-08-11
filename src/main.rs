@@ -8,17 +8,18 @@ use toml::Value;
 
 fn main() -> anyhow::Result<()> {
     let toml_str = r#"
-    [remaps]
+    [simple_remaps]
     caps_lock = "escape"
+
+    [baselayer]
+    caps_lock = { remap = "left_command+left_shift+left_option+left_control"}
 
     [layers]
     layer1 = "q+left_command+left_shift+left_option+left_control"
     layer2 = "v+left_command+left_shift+left_option+left_control"
 
-    # By default commands return to the base layer. Remaps remain in the current layer.
     [layer1]
     s = { command = "Open -a '1Password.app'", next_layer= "base" }
-    caps_lock = { remap = "left_shift+left_command+left_option+left_control"}
 
     [layer2]
     a = { command = "launchpad" }
