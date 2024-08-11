@@ -56,7 +56,7 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
             layer_assignment.layer.name,
             layer_assignment.key.into(),
             remaps.to.into(),
-            None,
+            layer_assignment.next_layer,
         ),
         Action::Command(command) => Rule::set_command_in_layer(
             layer_assignment.layer.name,
@@ -253,7 +253,7 @@ mod tests {
             action: Action::LayerRemap(LayerRemap {
                 to: vec![Key::Escape, Key::LeftShift],
             }),
-            next_layer: None,
+            next_layer: Some(BASE_LAYER.to_string()),
             description: None,
         };
 
@@ -277,7 +277,10 @@ mod tests {
                 manipulator_type: "basic".into(),
                 to_if_alone: None,
                 to_after_key_up: None,
-                to_delayed_action: None,
+                to_delayed_action: Some(DelayedAction {
+                    to_if_invoked: vec![SetVariable::new("layer1".to_string(), 0)],
+                    to_if_canceled: vec![],
+                }),
             }],
         };
 

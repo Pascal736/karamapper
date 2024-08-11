@@ -354,7 +354,7 @@ mod tests {
             layer1 = "q+left_command+left_shift+left_option+left_control"
 
             [layer1]
-            a = { command = "app_launcher" }
+            a = { remap = "b", next_layer = "baselayer" }
             "#;
 
         let layer1 = Layer {
@@ -390,10 +390,8 @@ mod tests {
                 LayerAssignment {
                     layer: layer1.clone(),
                     key: Key::A,
-                    action: Action::Command(Command {
-                        value: String::from("app_launcher"),
-                    }),
-                    next_layer: None,
+                    action: Action::LayerRemap(LayerRemap { to: vec![Key::B] }),
+                    next_layer: Some(layer.name),
                     description: None,
                 },
             ],
