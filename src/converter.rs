@@ -27,7 +27,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
         simple_modifications: configuration
-            .remaps
+            .simple_remaps
             .remaps
             .iter()
             .map(|r| remap_to_simple_modification(r.clone()))
@@ -72,7 +72,7 @@ fn layer_assignment_to_rule(layer_assignment: LayerAssignment) -> Rule {
     }
 }
 
-fn remaps_to_simple_modifications(remaps: Remaps) -> Vec<SimpleModification> {
+fn remaps_to_simple_modifications(remaps: SimpleRemaps) -> Vec<SimpleModification> {
     remaps
         .remaps
         .iter()
@@ -80,7 +80,7 @@ fn remaps_to_simple_modifications(remaps: Remaps) -> Vec<SimpleModification> {
         .collect()
 }
 
-fn remap_to_simple_modification(remap: Remap) -> SimpleModification {
+fn remap_to_simple_modification(remap: SimpleRemap) -> SimpleModification {
     SimpleModification {
         from: remap.from.into(),
         to: remap.to.iter().map(|k| k.clone().into()).collect(),
@@ -163,13 +163,13 @@ mod tests {
 
     #[test]
     fn test_remaps_to_simple_modifications() {
-        let remaps = Remaps {
+        let remaps = SimpleRemaps {
             remaps: vec![
-                Remap {
+                SimpleRemap {
                     from: Key::CapsLock,
                     to: vec![Key::LeftCommand],
                 },
-                Remap {
+                SimpleRemap {
                     from: Key::V,
                     to: vec![Key::LeftCommand, Key::V],
                 },

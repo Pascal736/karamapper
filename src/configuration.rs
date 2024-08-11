@@ -6,20 +6,20 @@ use crate::keys::Key;
 
 #[derive(Debug, Clone)]
 pub struct Configuration {
-    pub remaps: Remaps,
+    pub simple_remaps: SimpleRemaps,
     pub layers: Layers,
     pub layer_assignments: LayerAssignments,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Remap {
+pub struct SimpleRemap {
     pub from: Key,
     pub to: Vec<Key>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Remaps {
-    pub remaps: Vec<Remap>,
+pub struct SimpleRemaps {
+    pub remaps: Vec<SimpleRemap>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Layer {
@@ -68,7 +68,7 @@ pub struct LayerAssignments {
     pub assignments: Vec<LayerAssignment>,
 }
 
-impl Remaps {
+impl SimpleRemaps {
     pub fn from_toml(value: &Value) -> Result<Self> {
         let remaps = value
             .as_table()
@@ -87,10 +87,10 @@ impl Remaps {
                         ))
                     }
                 };
-                Ok(Remap { from, to })
+                Ok(SimpleRemap { from, to })
             })
-            .collect::<Result<Vec<Remap>>>()?;
-        Ok(Remaps { remaps })
+            .collect::<Result<Vec<SimpleRemap>>>()?;
+        Ok(SimpleRemaps { remaps })
     }
 }
 
@@ -126,9 +126,9 @@ impl Layers {
 impl Configuration {
     pub fn from_toml(value: &Value) -> Result<Self> {
         let remaps = value
-            .get("remaps")
+            .get("simple_remaps")
             .context("Missing remaps in configuration")?;
-        let remaps = Remaps::from_toml(remaps)?;
+        let remaps = SimpleRemaps::from_toml(remaps)?;
 
         let layers = value
             .get("layers")
@@ -138,7 +138,7 @@ impl Configuration {
         let layer_assignments = LayerAssignments::from_toml(value, layers.layers.clone())?;
 
         Ok(Configuration {
-            remaps,
+            simple_remaps: remaps,
             layers,
             layer_assignments,
         })
@@ -394,13 +394,13 @@ mod tests {
     #[test]
     fn test_remaps_from_toml() -> anyhow::Result<()> {
         let toml_str = r#"
-        [remaps]
+        [simple_remaps]
         caps_lock= "left_command"
         v = "escape"
         "#;
 
         let toml_value: Value = toml_str.parse()?;
-        let remaps = Remaps::from_toml(toml_value.get("remaps").unwrap())?;
+        let remaps = SimpleRemaps::from_toml(toml_value.get("simple_remaps").unwrap())?;
 
         assert_eq!(remaps.remaps.len(), 2);
         assert_eq!(remaps.remaps[0].from, Key::CapsLock);
@@ -434,7 +434,7 @@ mod tests {
     #[test]
     fn test_configuration_from_toml() -> Result<()> {
         let toml_str = r#"
-            [remaps]
+            [simple_remaps]
             caps_lock = "left_command"
 
             [layers]
