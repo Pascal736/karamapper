@@ -4,7 +4,7 @@ use crate::keys::Key;
 
 pub const DEFAULT_PROFILE_NAME: &str = "Default";
 
-pub fn convert_configuration(configuration: &Configuration) -> Profiles {
+pub fn convert_configuration(configuration: &Configuration) -> KarabinerConfig {
     let mut layer_rules: Vec<Rule> = configuration
         .layers
         .layers
@@ -31,7 +31,7 @@ pub fn convert_configuration(configuration: &Configuration) -> Profiles {
     let name = DEFAULT_PROFILE_NAME.to_string();
     let selected = true;
 
-    Profiles {
+    KarabinerConfig {
         profiles: vec![Profile {
             complex_modifications,
             devices,

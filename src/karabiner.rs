@@ -4,7 +4,7 @@ use crate::configuration::BASE_LAYER;
 use crate::keys::Key;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct Profiles {
+pub struct KarabinerConfig {
     pub profiles: Vec<Profile>,
 }
 
