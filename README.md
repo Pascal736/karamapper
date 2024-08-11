@@ -61,6 +61,6 @@ cargo install karamapper
 ```
 
 ## TODOs:
--[ ] Implement extend configuration method
--[ ] Add option to target specifc profiles
--[ ] Add backup option
+- [ ] Implement extend configuration method
+- [ ] Add option to target specifc profiles
+- [ ] Add backup option
