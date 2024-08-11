@@ -13,6 +13,7 @@ layer3 = "m+left_command+left_shift+left_option+left_control"
 escape = { move_layer = "baselayer" }
 o = { command = "Open -a '1Password.app'", next_layer = "baselayer" }
 b = { command = "Open -a 'Brave Browser.app'", next_layer = "baselayer" }
+f = { command = "Open -a 'Firefox.app'", next_layer = "baselayer" }
 z = { command = "Open -a 'Zed.app'", next_layer = "baselayer" }
 g = { command = "Open -a 'ChatGPT.app'", next_layer = "baselayer" }
 k = { command = "Open -a 'kitty.app'", next_layer = "baselayer" }
@@ -29,8 +30,24 @@ h = { remap = "k+left_shift+left_option", description = "Move Foucs left" }
 l = { remap = "j+left_shift+left_option", description = "Move Foucs Right" }
 y = { remap = "p+left_shift+left_option", description = "Move Foucs Left Screen" }
 o = { remap = "n+left_shift+left_option", description = "Move Foucs Right Screen" }
+key1 = { remap = "key1+left_control", next_layer = "baselayer", description = "Jump to Space 1" }
+key2 = { remap = "key2+left_control", next_layer = "baselayer", description = "Jump to Space 2" }
+key3 = { remap = "key3+left_control", next_layer = "baselayer", description = "Jump to Space 3" }
+key4 = { remap = "key4+left_control", next_layer = "baselayer", description = "Jump to Space 4" }
+key5 = { remap = "key5+left_control", next_layer = "baselayer", description = "Jump to Space 5" }
+key6 = { remap = "key6+left_control", next_layer = "baselayer", description = "Jump to Space 6" }
+key7 = { remap = "key7+left_control", next_layer = "baselayer", description = "Jump to Space 7" }
+key8 = { remap = "key8+left_control", next_layer = "baselayer", description = "Jump to Space 8" }
+key9 = { remap = "key9+left_control", next_layer = "baselayer", description = "Jump to Space 9" }
 
 [layer3]
 escape = { move_layer = "baselayer" }
 key1 = { remap = "key1+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 1" }
 key2 = { remap = "key2+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 2" }
+key3 = { remap = "key3+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 3" }
+key4 = { remap = "key4+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 4" }
+key5 = { remap = "key5+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 5" }
+key6 = { remap = "key6+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 6" }
+key7 = { remap = "key7+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 7" }
+key8 = { remap = "key8+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 8" }
+key9 = { remap = "key9+left_control+left_shift+left_option+left_control", next_layer = "baselayer", description = "Move to Space 9" }

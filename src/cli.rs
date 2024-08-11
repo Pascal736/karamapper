@@ -130,12 +130,6 @@ fn write_karabiner_config(config: KarabinerConfig) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use karabiner::{
-        ComplexModifications, FromKeyMapping, ManipulationTarget, Manipulator, Profile, Rule,
-        ToKeyMapping,
-    };
-    use keys::Key;
-
     use super::*;
     use std::io::Cursor;
 
@@ -159,40 +153,4 @@ mod tests {
         assert_eq!(result.profiles.first().unwrap().name, "Default profile");
         Ok(())
     }
-
-    // #[test]
-    // fn test_replace_config() -> anyhow::Result<()> {
-    //     let karabiner_config = get_karabiner_config(mock_config_str())?;
-
-    //     let config = KarabinerConfig {
-    //         profiles: vec![Profile {
-    //             name: "Default profile".to_string(),
-    //             selected: true,
-    //             devices: None,
-    //             complex_modifications: {
-    //                 ComplexModifications {
-    //                     rules: Some(vec![Rule {
-    //                         enabled: true,
-    //                         description: Some("Test".to_string()),
-    //                         manipulators: vec![Manipulator {
-    //                             conditions: None,
-    //                             from: FromKeyMapping {
-    //                                 key_code: Key::A,
-    //                                 modifiers: None,
-    //                             },
-    //                             to: ManipulationTarget {
-    //                                 Key
-
-    //                                 }
-    //                             manipulator_type: "basic".to_string(),
-    //                             to_if_alone: None,
-    //                             to_after_key_up: None,
-    //                             to_delayed_action: None,
-    //                         }],
-    //                     }]),
-    //                 }
-    //             },
-    //         }],
-    //     };
-    // }
 }
