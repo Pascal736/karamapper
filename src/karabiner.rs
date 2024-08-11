@@ -29,7 +29,7 @@ pub struct Rule {
 }
 
 impl Rule {
-    pub fn set_environment(name: String, from: KeyMapping) -> Self {
+    pub fn set_environment(name: String, from: FromKeyMapping) -> Self {
         Rule {
             description: Some(format!("Change to {}", name.to_lowercase())),
             enabled: true,
@@ -39,8 +39,8 @@ impl Rule {
 
     pub fn set_keymapping_in_layer(
         layer: String,
-        from: KeyMapping,
-        to: KeyMapping,
+        from: FromKeyMapping,
+        to: ToKeyMapping,
         target_layer: Option<String>,
     ) -> Self {
         Self {
@@ -57,7 +57,7 @@ impl Rule {
 
     pub fn set_command_in_layer(
         layer: String,
-        from: KeyMapping,
+        from: FromKeyMapping,
         to: ShellCommand,
         target_layer: Option<String>,
     ) -> Self {
@@ -73,7 +73,7 @@ impl Rule {
         }
     }
 
-    pub fn switch_layer(target_layer: String, source_layer: String, from: KeyMapping) -> Self {
+    pub fn switch_layer(target_layer: String, source_layer: String, from: FromKeyMapping) -> Self {
         Self {
             description: Some(format!("Switch to {}", target_layer)),
             enabled: true,
@@ -85,20 +85,20 @@ impl Rule {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Manipulator {
     pub conditions: Option<Vec<Condition>>,
-    pub from: KeyMapping,
+    pub from: FromKeyMapping,
     pub to: Option<Vec<ManipulationTarget>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub to_delayed_action: Option<DelayedAction>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub to_after_key_up: Option<Vec<ManipulationTarget>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub to_if_alone: Option<Vec<KeyMapping>>,
+    pub to_if_alone: Option<Vec<FromKeyMapping>>,
     #[serde(rename = "type")]
     pub manipulator_type: String,
 }
 
 impl Manipulator {
-    pub fn set_environment(name: String, from: KeyMapping) -> Self {
+    pub fn set_environment(name: String, from: FromKeyMapping) -> Self {
         Manipulator {
             conditions: Some(vec![]),
             from,
@@ -112,8 +112,8 @@ impl Manipulator {
 
     pub fn set_keymapping_in_layer(
         layer: String,
-        from: KeyMapping,
-        to: KeyMapping,
+        from: FromKeyMapping,
+        to: ToKeyMapping,
         target_layer: Option<String>,
     ) -> Self {
         Manipulator {
@@ -129,7 +129,7 @@ impl Manipulator {
 
     pub fn set_command_in_layer(
         layer: String,
-        from: KeyMapping,
+        from: FromKeyMapping,
         to: ShellCommand,
         target_layer: Option<String>,
     ) -> Self {
@@ -143,7 +143,11 @@ impl Manipulator {
             manipulator_type: "basic".to_string(),
         }
     }
-    fn switch_layer(target_layer: String, source_layer: String, from: KeyMapping) -> Manipulator {
+    fn switch_layer(
+        target_layer: String,
+        source_layer: String,
+        from: FromKeyMapping,
+    ) -> Manipulator {
         Manipulator {
             conditions: Some(vec![]),
             from,
@@ -204,10 +208,16 @@ pub struct Modifiers {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct KeyMapping {
+pub struct FromKeyMapping {
     pub key_code: Key,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub modifiers: Option<Modifiers>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct ToKeyMapping {
+    pub key_code: Key,
+    pub modifiers: Vec<Key>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -236,7 +246,7 @@ pub struct ShellCommand {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum ManipulationTarget {
-    KeyMapping(KeyMapping),
+    KeyMapping(ToKeyMapping),
     SetVariable(SetVariable),
     ShellCommand(ShellCommand),
 }

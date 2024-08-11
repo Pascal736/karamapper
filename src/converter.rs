@@ -102,19 +102,18 @@ impl From<Key> for Modifiers {
     }
 }
 
-impl From<Key> for KeyMapping {
+impl From<Key> for FromKeyMapping {
     fn from(value: Key) -> Self {
-        KeyMapping {
+        FromKeyMapping {
             key_code: value,
             modifiers: None,
         }
     }
 }
 
-impl From<Vec<Key>> for KeyMapping {
+impl From<Vec<Key>> for FromKeyMapping {
     fn from(keys: Vec<Key>) -> Self {
         let key_code = keys.first().unwrap().clone();
-
         let modifiers = match keys.len() {
             1 => None,
             _ => {
@@ -125,6 +124,20 @@ impl From<Vec<Key>> for KeyMapping {
 
                 Some(modifiers)
             }
+        };
+
+        Self {
+            key_code,
+            modifiers,
+        }
+    }
+}
+impl From<Vec<Key>> for ToKeyMapping {
+    fn from(keys: Vec<Key>) -> Self {
+        let key_code = keys.first().unwrap().clone();
+        let modifiers = match keys.len() {
+            1 => vec![],
+            _ => keys.iter().skip(1).map(|k| k.clone()).collect(),
         };
 
         Self {
@@ -238,7 +251,7 @@ mod tests {
             },
             key: Key::H,
             action: Action::LayerRemap(LayerRemap {
-                to: vec![Key::Escape],
+                to: vec![Key::Escape, Key::LeftShift],
             }),
             next_layer: None,
             description: None,
@@ -253,13 +266,13 @@ mod tests {
                     condition_type: "variable_if".into(),
                     value: 1,
                 }]),
-                from: KeyMapping {
+                from: FromKeyMapping {
                     key_code: Key::H,
                     modifiers: None,
                 },
-                to: Some(vec![ManipulationTarget::KeyMapping(KeyMapping {
+                to: Some(vec![ManipulationTarget::KeyMapping(ToKeyMapping {
                     key_code: Key::Escape,
-                    modifiers: None,
+                    modifiers: vec![Key::LeftShift],
                 })]),
                 manipulator_type: "basic".into(),
                 to_if_alone: None,
@@ -300,7 +313,7 @@ mod tests {
                     condition_type: "variable_if".into(),
                     value: 1,
                 }]),
-                from: KeyMapping {
+                from: FromKeyMapping {
                     key_code: Key::H,
                     modifiers: None,
                 },
@@ -341,7 +354,7 @@ mod tests {
             enabled: true,
             manipulators: vec![Manipulator {
                 conditions: Some(vec![]),
-                from: KeyMapping {
+                from: FromKeyMapping {
                     key_code: Key::H,
                     modifiers: None,
                 },
