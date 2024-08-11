@@ -4,21 +4,23 @@ use crate::configuration::BASE_LAYER;
 use crate::keys::Key;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct Profiles {
+pub struct KarabinerConfig {
     pub profiles: Vec<Profile>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Profile {
     pub complex_modifications: ComplexModifications,
-    pub devices: Vec<Device>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub devices: Option<Vec<Device>>,
     pub name: String,
     pub selected: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct ComplexModifications {
-    pub rules: Vec<Rule>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rules: Option<Vec<Rule>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
