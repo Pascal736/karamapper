@@ -22,7 +22,9 @@ pub fn convert_configuration(configuration: &Configuration) -> KarabinerConfig {
 
     layer_rules.extend(rules);
 
-    let complex_modifications = ComplexModifications { rules: layer_rules };
+    let complex_modifications = ComplexModifications {
+        rules: Some(layer_rules),
+    };
 
     let devices = vec![Device {
         identifiers: DeviceIdentifiers::default(),
@@ -34,7 +36,7 @@ pub fn convert_configuration(configuration: &Configuration) -> KarabinerConfig {
     KarabinerConfig {
         profiles: vec![Profile {
             complex_modifications,
-            devices,
+            devices: Some(devices),
             name,
             selected,
         }],
