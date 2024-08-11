@@ -355,7 +355,7 @@ mod tests {
 
             [layer1]
             a = { remap = "b", next_layer = "baselayer" }
-            escape = { next_layer= "baselayer" }
+            escape = { move_layer = "baselayer" }
             "#;
 
         let layer1 = Layer {
@@ -393,6 +393,18 @@ mod tests {
                     key: Key::A,
                     action: Action::LayerRemap(LayerRemap { to: vec![Key::B] }),
                     next_layer: Some(layer.name),
+                    description: None,
+                },
+                LayerAssignment {
+                    layer: Layer {
+                        name: String::from("layer1"),
+                        keys: vec![Key::LeftCommand],
+                    },
+                    key: Key::Escape,
+                    action: Action::LayerShift(LayerShift {
+                        move_layer: String::from("baselayer"),
+                    }),
+                    next_layer: None,
                     description: None,
                 },
             ],

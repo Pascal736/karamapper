@@ -33,6 +33,7 @@ fn main() -> anyhow::Result<()> {
     [layer2]
     escape = { move_layer= "baselayer" }
     m = { remap= "m+left_command", next_layer= "baselayer", description="Minimize Window" }
+    t = { remap ="left_option+left_shift+spacebar, description="Toggle Window Layout" }
     "#;
 
     let toml_value: Value = toml_str.parse()?;

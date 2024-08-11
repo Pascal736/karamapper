@@ -356,7 +356,11 @@ mod tests {
             description: Some("Switch to layer2".to_string()),
             enabled: true,
             manipulators: vec![Manipulator {
-                conditions: Some(vec![]),
+                conditions: Some(vec![Condition {
+                    name: "layer1".to_string(),
+                    condition_type: "variable_if".into(),
+                    value: 1,
+                }]),
                 from: FromKeyMapping {
                     key_code: Key::H,
                     modifiers: None,
