@@ -154,7 +154,7 @@ impl Manipulator {
         from: FromKeyMapping,
     ) -> Manipulator {
         Manipulator {
-            conditions: Some(vec![]),
+            conditions: Some(vec![Condition::active(source_layer.clone())]),
             from,
             to: Some(vec![
                 ManipulationTarget::set_active(target_layer),
