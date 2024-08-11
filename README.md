@@ -1,8 +1,14 @@
 # karamapper
 
-
-karamapper allows for an easier configuration for the karabiner keymapper.
+karamapper allows for an easier configuration for the [karabiner-elements](https://github.com/pqrs-org/Karabiner-Elements) keymapper.
 It has first class support for layers to which commands can be mapped.
+It's aim is not to replace the normal configuration but specicially to make it easier to configure layers.
+The whole bandwith of karabiner is not exposed.
+It's meant to be use standalone if only layers are needed or in combination with the normal karabiner configuration.
+
+> [!WARNING]
+> This is a work in progress. The package is not stable yet.
+
 
 ## Example Configuration
 ```toml
@@ -44,7 +50,17 @@ key2 = { remap = "key2+left_control+left_shift+left_option+left_control", next_l
 
 ## CLI Interface
 ```
-paramapper create --path mapping.toml --method replace # Replacs the configuration in $HOME/.config/karabiner/karabiner.json
-paramapper create --path mapping.toml --method extend # Extends the configuration in $HOME/.config/karabiner/karabiner.json
-paramapper create --path mapping.toml --method stdout # Prints the configuration to stdout
+paramapper create mapping.toml --method replace # Replaces the configuration in $HOME/.config/karabiner/karabiner.json
+paramapper create mapping.toml --method extend # Extends the configuration in $HOME/.config/karabiner/karabiner.json
+paramapper create mapping.toml --method stdout # Prints the configuration to stdout
 ```
+
+## Installation
+```bash
+cargo install karamapper
+```
+
+## TODOs:
+-[ ] Implement extend configuration method
+-[ ] Add option to target specifc profiles
+-[ ] Add backup option
