@@ -1,3 +1,5 @@
+[![crates.io version](https://img.shields.io/crates/v/paramapper)](https://crates.io/crates/paramapper)
+
 # karamapper
 
 karamapper allows for an easier configuration for the [karabiner-elements](https://github.com/pqrs-org/Karabiner-Elements) keymapper.
