@@ -1,4 +1,4 @@
-[![crates.io version](https://img.shields.io/crates/v/paramapper)](https://crates.io/crates/paramapper)
+[![crates.io version](https://img.shields.io/crates/v/karamapper)](https://crates.io/crates/karamapper)
 
 # karamapper
 
