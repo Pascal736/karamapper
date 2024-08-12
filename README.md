@@ -52,9 +52,9 @@ key2 = { remap = "key2+left_control+left_shift+left_option+left_control", next_l
 
 ## CLI Interface
 ```
-paramapper create mapping.toml --method replace # Replaces the configuration in $HOME/.config/karabiner/karabiner.json
-paramapper create mapping.toml --method extend # Extends the configuration in $HOME/.config/karabiner/karabiner.json
-paramapper create mapping.toml --method stdout # Prints the configuration to stdout
+karamapper create mapping.toml --method replace # Replaces the configuration in $HOME/.config/karabiner/karabiner.json
+karamapper create mapping.toml --method extend # Extends the configuration in $HOME/.config/karabiner/karabiner.json
+karamapper create mapping.toml --method std-out # Prints the configuration to stdout
 ```
 
 ## Installation
